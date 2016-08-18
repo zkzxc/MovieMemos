@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_item_seen"
+            android:icon="@drawable/ic_seen"
+            android:checked="true"
+            android:title="@string/drawer_menu_item_title_seen" />
+        <item
+            android:id="@+id/nav_item_want"
+            android:icon="@drawable/ic_want"
+            android:title="@string/drawer_menu_item_titile_want" />
+        <item
+            android:id="@+id/nav_item_tag"
+            android:icon="@drawable/ic_tag"
+            android:title="@string/drawer_menu_item_title_tag" />
+        <item
+            android:id="@+id/nav_item_top"
+            android:icon="@drawable/ic_top"
+            android:title="@string/drawer_menu_item_title_douban_top250" />
+    </group>
+    <item android:title="@string/drawer_menu_item_title_settings">
+        <menu>
+            <group android:checkableBehavior="all">
+                <item
+                    android:id="@+id/nav_item_settings"
+                    android:icon="@drawable/ic_settings"
+                    android:title="@string/drawer_menu_item_title_settings" />
+                <item
+                    android:id="@+id/nav_item_nightmode"
+                    android:checkable="true"
+                    android:icon="@drawable/ic_night"
+                    android:title="@string/drawer_menu_item_title_nightmode" />
+            </group>
+        </menu>
+    </item>
+
+</menu>

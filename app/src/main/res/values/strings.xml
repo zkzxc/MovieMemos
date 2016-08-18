@@ -1,0 +1,23 @@
+<resources>
+    <string name="app_name">MovieMemos</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="drawer_menu_item_title_seen">已看</string>
+    <string name="drawer_menu_item_titile_want">想看</string>
+    <string name="drawer_menu_item_title_tag">标签</string>
+    <string name="drawer_menu_item_title_douban_top250">豆瓣TOP250</string>
+    <string name="drawer_menu_item_title_settings">设置</string>
+    <string name="drawer_menu_item_title_nightmode">夜间模式</string>
+    <string name="no_result">没有符合条件的结果</string>
+    <string name="add_memo">请点击 + 添加记录</string>
+    <string name="search_hint">搜索</string>
+    <string name="before_search">数据由 豆瓣电影 提供</string>
+    <string name="summary">简介</string>
+    <string name="director">导演</string>
+    <string name="cast">主演</string>
+    <string name="fragment_title_search">搜索</string>
+    <string name="transition_name_poster">img</string>
+    <string name="transition_name_title">title</string>
+</resources>
