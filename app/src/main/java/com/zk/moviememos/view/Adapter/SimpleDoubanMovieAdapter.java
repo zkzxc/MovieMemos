@@ -10,9 +10,11 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.zk.moviememos.App;
 import com.zk.moviememos.BR;
 import com.zk.moviememos.R;
 import com.zk.moviememos.databinding.SimpleDoubanMovieItemBinding;
+import com.zk.moviememos.util.DisplayUtils;
 import com.zk.moviememos.util.LogUtils;
 import com.zk.moviememos.util.ResourseUtils;
 import com.zk.moviememos.vo.SimpleDoubanMovie;
@@ -54,9 +56,26 @@ public class SimpleDoubanMovieAdapter extends RecyclerView.Adapter<SimpleDoubanM
             holder.binding.ivMovieImageMedium.setTransitionName(ResourseUtils
                     .getString(R.string.transition_name_poster));
         }
-        Glide.with(context).load(movie.getImages().getMedium()).override(100,150).into(holder.binding.ivMovieImageMedium);
+        Glide.with(context).load(movie.getImages().getMedium()).override(100, 150).into(holder.binding
+                .ivMovieImageMedium);
         holder.binding.setVariable(BR.simpleDoubanMovie, movie);
         holder.binding.executePendingBindings();
+
+        // 动态设置title的宽度，以适应不同屏幕的手机
+        int windowWidth = DisplayUtils.getWindowWidth(App.getContext());
+        float tvTVWidth1 = DisplayUtils.getTextViewWidth(holder.binding.tvTV, (String) holder.binding.tvTV.getText());
+        float tvRatingWidth1 = DisplayUtils.getTextViewWidth(holder.binding.tvRating, (String) holder.binding
+                .tvRating.getText());
+        int titleWidth = 0;
+        if (holder.binding.getSimpleDoubanMovie().isTv()) {
+
+            titleWidth = (int) (windowWidth - DisplayUtils.dip2px(App.getContext(), 149) - tvTVWidth1 -
+                    tvRatingWidth1 + 0.5f);
+        } else {
+            titleWidth = (int) (windowWidth - DisplayUtils.dip2px(App.getContext(), 149) - tvRatingWidth1 + 0.5f);
+        }
+        LogUtils.d(this, "titlewidth = " + titleWidth);
+        holder.binding.tvMovieTitle.setWidth(titleWidth);
     }
 
     @Override
@@ -88,7 +107,7 @@ public class SimpleDoubanMovieAdapter extends RecyclerView.Adapter<SimpleDoubanM
             if (onItemClickListener != null) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     onItemClickListener.onItemclick(movieId, binding.getSimpleDoubanMovie().getTitle(), binding
-                            .getSimpleDoubanMovie().getImages().getMedium(), binding.ivMovieImageMedium,
+                                    .getSimpleDoubanMovie().getImages().getMedium(), binding.ivMovieImageMedium,
                             ResourseUtils.getString(R.string.transition_name_poster));
                 } else {
                     onItemClickListener.onItemclick(movieId, binding.getSimpleDoubanMovie().getTitle(), binding

@@ -31,8 +31,6 @@ import com.zk.moviememos.util.LogUtils;
  */
 public class MovieActivity extends AppCompatActivity {
 
-    public static final String MOVIE_ID = "movieId";
-
     private ActivityMovieBinding binding;
 
     private Drawable mediumPoster;
@@ -64,7 +62,6 @@ public class MovieActivity extends AppCompatActivity {
         DoubanMovieModel.getInstance().getMovieById(movieId, new MovieModel.GetMovieCallBack() {
             @Override
             public void onSuccess(DoubanMovie doubanMovie) {
-                //binding.collapsingToolbar.setTitle(doubanMovie.getTitle());
                 binding.setDoubanMovie(doubanMovie);
                 Glide.with(MovieActivity.this).load(doubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
                         .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);

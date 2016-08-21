@@ -2,16 +2,22 @@ package com.zk.moviememos.vo;
 
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
-import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.zk.moviememos.BR;
+import com.zk.moviememos.R;
+import com.zk.moviememos.po.DoubanCelebrity;
+import com.zk.moviememos.util.LogUtils;
+import com.zk.moviememos.util.ResourseUtils;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
  */
-public class SimpleDoubanMovie extends BaseObservable implements Serializable{
+public class SimpleDoubanMovie extends BaseObservable implements Serializable {
+
     private String id;
     private String title;
     private String original_title;
@@ -19,6 +25,77 @@ public class SimpleDoubanMovie extends BaseObservable implements Serializable{
     private Rating rating;
     private String year;
     private String subtype;
+    private List<DoubanCelebrity> directors;
+    private List<DoubanCelebrity> casts;
+    private String titleAndYear;
+    private boolean tv;
+
+    @Bindable
+    public String getDirectors() {
+        if (directors != null && directors.size() > 0) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(ResourseUtils.getString(R.string.director))
+                    .append(":")
+                    .append(directors.get(0).getName());
+            if (directors.size() > 1) {
+                stringBuilder.append(" ").append(ResourseUtils.getString(R.string.etc));
+            }
+            return stringBuilder.toString();
+        } else {
+            return null;
+        }
+    }
+
+    public void setDirectors(List<DoubanCelebrity> directors) {
+        this.directors = directors;
+        notifyPropertyChanged(BR.directors);
+    }
+
+    @Bindable
+    public String getCasts() {
+        if (casts != null && casts.size() > 0) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(ResourseUtils.getString(R.string.cast))
+                    .append(":")
+                    .append(casts.get(0).getName());
+            if (casts.size() > 1) {
+                stringBuilder.append(" ").append(ResourseUtils.getString(R.string.etc));
+            }
+            return stringBuilder.toString();
+        } else {
+            return null;
+        }
+    }
+
+    public void setCasts(List<DoubanCelebrity> casts) {
+        this.casts = casts;
+        notifyPropertyChanged(BR.casts);
+    }
+
+
+    @Bindable
+    public boolean isTv() {
+        return subtype.equals("tv");
+    }
+
+    public void setTv(boolean tv) {
+        this.tv = tv;
+        notifyPropertyChanged(BR.tv);
+    }
+
+    @Bindable
+    public String getTitleAndYear() {
+        if (TextUtils.isEmpty(year)) {
+            return title;
+        } else {
+            return title + " (" + year + ")";
+        }
+    }
+
+    public void setTitleAndYear(String titleAndYear) {
+        this.titleAndYear = titleAndYear;
+        notifyPropertyChanged(BR.titleAndYear);
+    }
 
     public String getId() {
         return id;
@@ -88,7 +165,8 @@ public class SimpleDoubanMovie extends BaseObservable implements Serializable{
         notifyPropertyChanged(BR.subtype);
     }
 
-    public class Images{
+    public class Images {
+
         private String small;
         private String medium;
         private String large;
@@ -118,7 +196,8 @@ public class SimpleDoubanMovie extends BaseObservable implements Serializable{
         }
     }
 
-    public class Rating{
+    public class Rating {
+
         private Integer max;
         private Float average;
         private String stars;

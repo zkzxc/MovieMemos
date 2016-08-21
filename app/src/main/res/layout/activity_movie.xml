@@ -263,7 +263,7 @@
             <Button
                 android:id="@+id/bn_add_to_seen"
                 style="@style/MovieButton"
-                android:text="添加记录"
+                android:text="@string/add_to_seen"
                 android:textColor="@android:color/white" />
 
             <View
@@ -275,7 +275,7 @@
             <Button
                 android:id="@+id/bn_add_to_want"
                 style="@style/MovieButton"
-                android:text="加入想看"
+                android:text="@string/add_to_want"
                 android:textColor="@android:color/white" />
 
             <View
@@ -287,7 +287,7 @@
             <Button
                 android:id="@+id/bn_add_flag"
                 style="@style/MovieButton"
-                android:text="添加标签"
+                android:text="@string/add_tag"
                 android:textColor="@android:color/white" />
 
         </LinearLayout>
