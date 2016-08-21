@@ -27,7 +27,7 @@ public class ListUtils {
             }
             return sb.substring(0, sb.length() - 1);
         } else {
-            Log.w("ListUtils", "the list is null or has no element.");
+            Log.i("ListUtils", "the list is null or has no element.");
             return null;
         }
     }
@@ -47,7 +47,7 @@ public class ListUtils {
             }
             return sb.substring(0, sb.length() - 1);
         } else {
-            Log.w("ListUtils", "the list is null or has no element.");
+            Log.i("ListUtils", "the list is null or has no element.");
             return null;
         }
     }
