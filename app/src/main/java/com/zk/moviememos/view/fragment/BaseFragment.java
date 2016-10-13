@@ -4,10 +4,10 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.AppCompatActivity;
 
 import com.zk.moviememos.presenter.BasePresenter;
 import com.zk.moviememos.view.BaseView;
-import com.zk.moviememos.view.activity.MainActivity;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
@@ -17,12 +17,12 @@ public class BaseFragment<T> extends Fragment implements BaseView<T> {
     protected static final String STATE_IS_HIDDEN = "state_is_hidden";
 
     protected T mPresenter;
-    protected MainActivity mActivity;
+    protected AppCompatActivity mActivity;
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        this.mActivity = (MainActivity) context;
+        this.mActivity = (AppCompatActivity) context;
     }
 
     @Override
@@ -48,16 +48,12 @@ public class BaseFragment<T> extends Fragment implements BaseView<T> {
 
     @Override
     public void showProgress() {
-        if (isActive() && mActivity != null) {
-            mActivity.showProgress();
-        }
+
     }
 
     @Override
     public void hideProgress() {
-        if (isActive() && mActivity != null) {
-            mActivity.hideProgress();
-        }
+
     }
 
     /**

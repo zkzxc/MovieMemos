@@ -3,6 +3,8 @@ package com.zk.moviememos.view.activity;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.Bundle;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -18,10 +20,14 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import com.zk.moviememos.R;
+import com.zk.moviememos.model.DoubanMovieModel;
 import com.zk.moviememos.model.LocalMemoModel;
 import com.zk.moviememos.presenter.BasePresenter;
+import com.zk.moviememos.presenter.SearchMoviesPresenter;
 import com.zk.moviememos.presenter.SeenMemosPresenter;
 import com.zk.moviememos.util.FragmentUtils;
+import com.zk.moviememos.util.LogUtils;
+import com.zk.moviememos.view.fragment.SearchMoviesFragment;
 import com.zk.moviememos.view.fragment.SeenMemosFragment;
 import com.zk.moviememos.view.fragment.TagFragment;
 import com.zk.moviememos.view.fragment.TopFragment;
@@ -35,6 +41,7 @@ public class MainActivity extends AppCompatActivity
 
     private DrawerLayout mDrawer;
     private Toolbar mToolbar;
+    private FloatingActionButton fab;
 
     private FrameLayout flProgress;
     private ImageView ivProgress;
@@ -47,6 +54,7 @@ public class MainActivity extends AppCompatActivity
     private WantMemosFragment mWantMemosFragment;
     private TagFragment mTagFragment;
     private TopFragment mTopFragment;
+    private SearchMoviesFragment mSearchMoviesFragment;
 
     private BasePresenter mPresenter;   //记录当前的Presenter
     private SeenMemosPresenter mSeenMemosPresenter;
@@ -78,22 +86,62 @@ public class MainActivity extends AppCompatActivity
         mProgressAnimator.setRepeatCount(ValueAnimator.INFINITE);
         mProgressAnimator.setInterpolator(new LinearInterpolator());
 
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSearchMoviesFragment = (SearchMoviesFragment) mFragmentManager.findFragmentByTag(
+                        SearchMoviesFragment.TAG);
+                if (mSearchMoviesFragment == null) {
+                    mSearchMoviesFragment = SearchMoviesFragment.getInstance(true);
+                    SearchMoviesPresenter searchMoviesPresenter = SearchMoviesPresenter.getInstance(
+                            DoubanMovieModel.getInstance(), mSearchMoviesFragment);
+                }
+                FragmentUtils.switchFragment(mFragmentManager, mFragment, mSearchMoviesFragment,
+                        mFragment.getClass().getSimpleName(), true);
+                mFragment = mSearchMoviesFragment;
+
+                fab.setVisibility(View.GONE);
+                AppBarLayout.LayoutParams lp = (AppBarLayout.LayoutParams) mToolbar.getLayoutParams();
+                lp.setScrollFlags(0);
+                mToolbar.setLayoutParams(lp);
+            }
+        });
+
         //初始化Fragment
         if (savedInstanceState == null) {
             mFragmentManager = getSupportFragmentManager();
             mSeenMemosFragment = (SeenMemosFragment) mFragmentManager.findFragmentById(R.id.fl_content);
             if (mSeenMemosFragment == null) {
                 mSeenMemosFragment = SeenMemosFragment.getInstance();
-                mSeenMemosPresenter = SeenMemosPresenter.getInstance(LocalMemoModel.getInstance(),
+                mSeenMemosPresenter = SeenMemosPresenter.getInstance(LocalMemoModel.getInstance(this),
                         mSeenMemosFragment);
                 FragmentUtils.addfragment(getSupportFragmentManager(), mSeenMemosFragment,
-                        R.id.fl_content);
+                        R.id.fl_content, SeenMemosFragment.TAG);
                 mFragment = mSeenMemosFragment;
                 mPresenter = mSeenMemosPresenter;
             }
         }
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        LogUtils.d(this, "restore...................");
+        mFragmentManager = getSupportFragmentManager();
+        mSeenMemosFragment = (SeenMemosFragment) mFragmentManager.findFragmentById(R.id.fl_content);
+        mSeenMemosPresenter = SeenMemosPresenter.getInstance(LocalMemoModel.getInstance(this),
+                mSeenMemosFragment);
+        FragmentUtils.addfragment(getSupportFragmentManager(), mSeenMemosFragment,
+                R.id.fl_content);
+        mFragment = mSeenMemosFragment;
+        mPresenter = mSeenMemosPresenter;
+    }
 
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -139,7 +187,32 @@ public class MainActivity extends AppCompatActivity
     public void onBackPressed() {
         if (mDrawer != null && mDrawer.isDrawerOpen(GravityCompat.START)) {
             mDrawer.closeDrawer(GravityCompat.START);
-        } else {
+        } else if (mFragment == mSearchMoviesFragment) {
+            AppBarLayout.LayoutParams lp = (AppBarLayout.LayoutParams) mToolbar.getLayoutParams();
+            switch (mFragment.getTag()) {
+                case SeenMemosFragment.TAG:
+                    fab.setVisibility(View.VISIBLE);
+                    lp.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL |
+                            AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+                    mFragment = mSeenMemosFragment;
+                    break;
+                case WantMemosFragment.TAG:
+                    fab.setVisibility(View.VISIBLE);
+                    lp.setScrollFlags(0);
+                    mFragment = mWantMemosFragment;
+                    break;
+                case TagFragment.TAG:
+                    fab.setVisibility(View.VISIBLE);
+                    lp.setScrollFlags(0);
+                    mFragment = mTagFragment;
+                    break;
+                case TopFragment.TAG:
+                    fab.setVisibility(View.GONE);
+                    lp.setScrollFlags(0);
+                    mFragment = mTopFragment;
+                    break;
+            }
+            mToolbar.setLayoutParams(lp);
             super.onBackPressed();
         }
     }
@@ -168,7 +241,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    public Toolbar getToolbar(){
+    public Toolbar getToolbar() {
         return mToolbar;
+    }
+
+    public FloatingActionButton getFab() {
+        return fab;
     }
 }

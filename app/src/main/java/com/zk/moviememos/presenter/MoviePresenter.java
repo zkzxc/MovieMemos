@@ -2,30 +2,33 @@ package com.zk.moviememos.presenter;
 
 import com.zk.moviememos.contract.MovieContract;
 import com.zk.moviememos.model.DoubanMovieModel;
+import com.zk.moviememos.model.LocalMemoModel;
 import com.zk.moviememos.model.MovieModel;
 import com.zk.moviememos.po.DoubanMovie;
+import com.zk.moviememos.view.Adapter.SimpleDoubanMovieAdapter;
+import com.zk.moviememos.view.fragment.SeenMemosFragment;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
  */
 public class MoviePresenter implements MovieContract.Presenter {
 
-    private DoubanMovieModel mModel;
+    private DoubanMovieModel movieModel;
+    private LocalMemoModel memoModel;
     private MovieContract.View mView;
     private String movieId;
 
-    private static MoviePresenter mPresenter;
-
-    public static MoviePresenter getInstance(DoubanMovieModel model, MovieContract.View view, String movieId) {
-        if (mPresenter == null) {
-            mPresenter = new MoviePresenter(model, view, movieId);
-        }
-        return mPresenter;
+    public static MoviePresenter getInstance(DoubanMovieModel movieModel, LocalMemoModel memoModel,
+                                             MovieContract.View view, String movieId) {
+        MoviePresenter presenter = new MoviePresenter(movieModel, memoModel, view, movieId);
+        return presenter;
     }
 
 
-    private MoviePresenter(DoubanMovieModel model, MovieContract.View view, String movieId) {
-        this.mModel = model;
+    private MoviePresenter(DoubanMovieModel movieModel, LocalMemoModel memoModel,
+                           MovieContract.View view, String movieId) {
+        this.movieModel = movieModel;
+        this.memoModel = memoModel;
         this.mView = view;
         this.movieId = movieId;
         mView.setPresenter(this);
@@ -33,22 +36,28 @@ public class MoviePresenter implements MovieContract.Presenter {
 
     @Override
     public void init() {
-        getMovie();
     }
 
-    public void getMovie() {
-        mView.showProgress();
-        mModel.getMovieById(movieId, new MovieModel.GetMovieCallBack() {
-            @Override
-            public void onSuccess(DoubanMovie doubanMovie) {
-                mView.hideProgress();
-                mView.showMovie(doubanMovie);
-            }
+    public void getMovie(String todo) {
+        if (SimpleDoubanMovieAdapter.SHOW_MOVIE_DETAIL.equals(todo)) {
+            mView.showProgress();
+            movieModel.getMovieById(movieId, new MovieModel.GetMovieCallBack() {
+                @Override
+                public void onSuccess(DoubanMovie doubanMovie) {
+                    if (mView.isActive()) {
+                        mView.hideProgress();
+                        mView.showMovie(doubanMovie);
+                    }
+                }
 
-            @Override
-            public void onFailure() {
+                @Override
+                public void onFailure() {
 
-            }
-        });
+                }
+            });
+        } else if (SeenMemosFragment.SHOW_MEMO.equals(todo)) {
+
+        }
+
     }
 }

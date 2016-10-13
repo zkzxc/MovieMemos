@@ -11,7 +11,7 @@ public interface MovieContract {
 
     interface View extends BaseView<Presenter> {
 
-        void showMovie(DoubanMovie movie);
+        public void showMovie(DoubanMovie doubanMovie);
     }
 
     interface Presenter extends BasePresenter {

@@ -1,0 +1,369 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="memo"
+            type="com.zk.moviememos.po.Memo" />
+    </data>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:popupTheme="@style/ThemeOverlay.AppCompat.Light">
+
+        <LinearLayout
+            style="@style/block_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:divider="?android:attr/listDivider"
+            android:orientation="vertical"
+            android:showDividers="middle">
+
+            <LinearLayout
+                android:id="@+id/ll_viewing_date"
+                style="@style/add_edit_memo_item_background">
+
+                <TextView
+                    android:id="@+id/tv_viewing_date_title"
+                    style="@style/item_title"
+                    android:text="@string/viewing_date" />
+
+                <TextView
+                    android:id="@+id/tv_viewing_date"
+                    style="@style/item_content"
+                    android:layout_marginLeft="18dp"
+                    android:editable="false"
+                    android:hint="@string/viewing_date_hint" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_viewing_way"
+                style="@style/add_edit_memo_item_background">
+
+                <TextView
+                    android:id="@+id/tv_viewing_way_title"
+                    style="@style/item_title"
+                    android:text="@string/viewing_way" />
+
+                <Spinner
+                    android:id="@+id/sp_viewing_way"
+                    style="@style/item_content"
+                    android:layout_width="150dp"
+                    android:dropDownWidth="150dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_viewing_version"
+                style="@style/add_edit_memo_item_background">
+
+                <TextView
+                    style="@style/item_title"
+                    android:text="@string/viewing_version" />
+
+                <Spinner
+                    android:id="@+id/sp_viewing_version1"
+                    style="@style/item_content"
+                    android:layout_width="150dp"
+                    android:dropDownWidth="150dp"
+                    android:entries="@array/viewing_version_1" />
+
+                <Spinner
+                    android:id="@+id/sp_viewing_version2"
+                    style="@style/item_content"
+                    android:layout_width="100dp"
+                    android:dropDownWidth="100dp"
+                    android:entries="@array/viewing_version_2" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_movie_version"
+                style="@style/add_edit_memo_item_background">
+
+                <TextView
+                    style="@style/item_title"
+                    android:text="@string/movie_version" />
+
+                <Spinner
+                    android:id="@+id/sp_movie_version"
+                    style="@style/item_content"
+                    android:layout_width="150dp"
+                    android:dropDownWidth="150dp"
+                    android:entries="@array/movie_version" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_viewing_mood"
+                style="@style/add_edit_memo_item_background">
+
+                <TextView
+                    style="@style/item_title"
+                    android:text="@string/viewing_mood" />
+
+                <RadioGroup
+                    android:id="@+id/rg_viewing_mood"
+                    style="@style/item_content"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/rb_mood_good"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/good"
+                        android:textSize="16sp" />
+
+                    <RadioButton
+                        android:id="@+id/rb_mood_average"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="true"
+                        android:text="@string/average"
+                        android:textSize="16sp" />
+
+                    <RadioButton
+                        android:id="@+id/rb_mood_bad"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/bad"
+                        android:textSize="16sp" />
+                </RadioGroup>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/ll_rate"
+            style="@style/block_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="?android:attr/listDivider"
+            android:orientation="vertical"
+            android:showDividers="middle">
+
+            <RelativeLayout
+                android:id="@+id/rl_average_score"
+                style="@style/add_edit_memo_item_background"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right">
+
+                <LinearLayout
+                    android:id="@+id/ll_average_score"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/item_title"
+                        android:layout_width="44dp"
+                        android:layout_gravity="center_vertical"
+                        android:text="@string/rating" />
+
+                    <LinearLayout
+                        style="@style/item_content"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="40dp"
+                        android:layout_gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <RatingBar
+                            android:id="@+id/rb_average_score"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical" />
+
+                        <TextView
+                            android:id="@+id/tv_average_score"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="center_vertical"
+                            android:layout_marginLeft="10dp"
+                            android:text="0"
+                            android:textSize="20sp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/ll_rate_expand"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_below="@id/ll_average_score"
+                    android:paddingBottom="4dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        style="@style/item_title"
+                        android:layout_width="76dp"
+                        android:text="@string/subitem_rating" />
+
+                    <ImageView
+                        android:id="@+id/iv_expand"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="center_vertical"
+                        android:scaleType="fitCenter"
+                        android:src="@drawable/ic_expand" />
+                </LinearLayout>
+            </RelativeLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_story_score"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                style="@style/add_edit_memo_item_background"
+                android:layout_gravity="right">
+
+                <TextView
+                    style="@style/item_title"
+                    android:text="@string/story" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/item_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <RatingBar
+                        android:id="@+id/rb_story_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+
+                    <TextView
+                        android:id="@+id/tv_story_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:text="0"
+                        android:textSize="18sp" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ll_visual_score"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                style="@style/add_edit_memo_item_background"
+                android:layout_gravity="right">
+
+                <TextView
+                    style="@style/item_title"
+                    android:text="@string/visual" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/item_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <RatingBar
+                        android:id="@+id/rb_visual_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+
+                    <TextView
+                        android:id="@+id/tv_visual_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:text="0"
+                        android:textSize="18sp" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/ll_aural_score"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                style="@style/add_edit_memo_item_background"
+                android:layout_gravity="right">
+
+                <TextView
+                    style="@style/item_title"
+                    android:text="@string/aural" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    style="@style/item_content"
+                    android:layout_gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <RatingBar
+                        android:id="@+id/rb_aural_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical" />
+
+                    <TextView
+                        android:id="@+id/tv_aural_score"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_vertical"
+                        android:layout_marginLeft="10dp"
+                        android:text="0"
+                        android:textSize="18sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            style="@style/block_background"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:divider="?android:attr/listDivider"
+            android:orientation="vertical"
+            android:showDividers="middle">
+
+            <LinearLayout
+                android:id="@+id/ll_tag"
+                style="@style/add_edit_memo_item_background">
+
+                <TextView
+                    style="@style/item_title"
+                    android:layout_width="44dp"
+                    android:text="@string/tag" />
+
+                <TextView
+                    android:id="@+id/tv_tag"
+                    style="@style/item_content"
+                    android:layout_marginLeft="44dp"
+                    android:hint="@string/tag_hint" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/ll_short_comment"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout style="@style/add_edit_memo_item_background">
+
+                    <TextView
+                        style="@style/item_title"
+                        android:layout_width="44dp"
+                        android:text="@string/short_comment" />
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/et_short_comment"
+                    style="@style/item_content"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="left|top"
+                    android:hint="写下你对这部影片的简短评价或观影感受"
+                    android:inputType="textMultiLine"
+                    android:minLines="5" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>

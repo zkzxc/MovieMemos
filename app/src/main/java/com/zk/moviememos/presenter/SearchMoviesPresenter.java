@@ -57,7 +57,6 @@ public class SearchMoviesPresenter implements SearchMoviesContract.Presenter, Si
                 if (mView.isActive()) {
                     mView.hideProgress();
                     mView.hideInput();
-                    LogUtils.i(this, "search success!!!");
                     if (simpleDoubanMovies.size() > 0) {
                         mView.showResults(simpleDoubanMovies);
                     } else {
@@ -81,7 +80,8 @@ public class SearchMoviesPresenter implements SearchMoviesContract.Presenter, Si
     }
 
     @Override
-    public void onItemclick(String movieId, String title, String posterUrl, ImageView imageView, String transitionName) {
-        mView.showItem(movieId, title, posterUrl, imageView, transitionName);
+    public void onItemclick(String todo, String movieId, String title, boolean isTv, String posterUrl, ImageView
+            imageView, String transitionName) {
+        mView.showItem(todo, movieId, title, isTv, posterUrl, imageView, transitionName);
     }
 }

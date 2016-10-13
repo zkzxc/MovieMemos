@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/viewing_way_cinema"
+        android:orderInCategory="1"
+        android:title="@string/cinema" />
+    <item
+        android:id="@+id/viewing_way_download"
+        android:orderInCategory="2"
+        android:title="@string/download" />
+    <item
+        android:id="@+id/viewing_way_DVD"
+        android:orderInCategory="3"
+        android:title="@string/dvd" />
+    <item
+        android:id="@+id/viewing_way_online"
+        android:orderInCategory="4"
+        android:title="@string/online" />
+    <item
+        android:id="@+id/viewing_way_TV"
+        android:orderInCategory="5"
+        android:title="@string/tv" />
+    <item
+        android:id="@+id/viewing_way_other"
+        android:orderInCategory="9"
+        android:title="@string/other" />
+
+</menu>

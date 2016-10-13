@@ -13,6 +13,8 @@ import com.zk.moviememos.contract.WantMemosContract;
  */
 public class WantMemosFragment extends BaseFragment<WantMemosContract.Presenter> {
 
+    public static final String TAG = "WantMemosFragment";
+
     private static WantMemosFragment mFragment;
 
     public static WantMemosFragment getInstance() {

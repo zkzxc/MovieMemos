@@ -2,8 +2,9 @@ package com.zk.moviememos.po;
 
 import android.databinding.BaseObservable;
 
-import com.zk.moviememos.constants.BusinessConstans;
+import com.zk.moviememos.R;
 import com.zk.moviememos.util.ListUtils;
+import com.zk.moviememos.util.ResourseUtils;
 
 import java.util.List;
 
@@ -32,6 +33,73 @@ public class DoubanMovie extends BaseObservable {
     private String viewingFlag;
     private List<Memo> memoList;
     private List<Tag> tagList;
+    private Integer seasons_count;
+    private String episodes_count;
+
+    private boolean tv;
+    private String seasonCountStr;
+    private String episodesCountStr;
+
+    private String directorsNames;
+    private String castsNames;
+
+    public boolean isTv() {
+        return subtype.equals("tv");
+    }
+
+    public void setTv(boolean tv) {
+        this.tv = tv;
+    }
+
+    public String getSeasonsCountStr() {
+        if (seasons_count != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(ResourseUtils.getString(R.string.total))
+                    .append(seasons_count)
+                    .append(ResourseUtils.getString(R.string.season));
+            return stringBuilder.toString();
+        } else {
+            return null;
+        }
+    }
+
+    public void setSeasonsCountStr(String seasonsCountStr) {
+        this.seasonCountStr = seasonsCountStr;
+    }
+
+    public String getEpisodesCountStr() {
+        if (episodes_count != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            stringBuilder.append(ResourseUtils.getString(R.string.this_season))
+                    .append(ResourseUtils.getString(R.string.total))
+                    .append(episodes_count)
+                    .append(ResourseUtils.getString(R.string.episode));
+            return stringBuilder.toString();
+        } else {
+            return null;
+        }
+    }
+
+    public void setEpisodesCountStr(String episodesCountStr) {
+        this.episodesCountStr = episodesCountStr;
+    }
+
+
+    public String getDirectorsNames() {
+        return ListUtils.doubanCelebrityListToString(directors);
+    }
+
+    public void setDirectorsNames(String directorsNames) {
+        this.directorsNames = directorsNames;
+    }
+
+    public String getCastsNames() {
+        return ListUtils.doubanCelebrityListToString(casts);
+    }
+
+    public void setCastsNames(String castsNames) {
+        this.castsNames = castsNames;
+    }
 
     public String getId() {
         return id;
@@ -58,7 +126,12 @@ public class DoubanMovie extends BaseObservable {
     }
 
     public String getAka() {
-        return ListUtils.stringListToString(aka);
+        if (aka.size() > 3) {
+            List<String> newAka = aka.subList(0, 3);
+            return ListUtils.stringListToString(newAka);
+        } else {
+            return ListUtils.stringListToString(aka);
+        }
     }
 
     public void setAka(List<String> aka) {
@@ -98,13 +171,7 @@ public class DoubanMovie extends BaseObservable {
     }
 
     public String getSubtype() {
-        if ("movie".equals(subtype)) {  //从豆瓣得到的字符串为"movie"或者"tv"，转换成“M”或“T”
-            return BusinessConstans.SUBTYPE_MOVIE;
-        }else if ("tv".equals(subtype)) {
-            return BusinessConstans.SUBTYPE_TV;
-        }else {
-            return subtype;
-        }
+        return subtype;
     }
 
     public void setSubtype(String subtype) {
@@ -183,6 +250,22 @@ public class DoubanMovie extends BaseObservable {
         this.tagList = tagList;
     }
 
+    public Integer getSeasons_count() {
+        return seasons_count;
+    }
+
+    public void setSeasons_count(Integer seasons_count) {
+        this.seasons_count = seasons_count;
+    }
+
+    public String getEpisodes_count() {
+        return episodes_count;
+    }
+
+    public void setEpisodes_count(String episodes_count) {
+        this.episodes_count = episodes_count;
+    }
+
     public class DoubanMovieImages {
 
         private String small;
@@ -213,12 +296,36 @@ public class DoubanMovie extends BaseObservable {
             this.large = large;
         }
     }
+
     public class DoubanMovieScore {
 
         private Integer max;
         private Float average;
         private String stars;
         private Integer min;
+
+        private Float ratingStar;
+        private String averageStr;
+
+        public String getAverageStr() {
+            if (average == 0.0) {
+                return ResourseUtils.getString(R.string.no_raing);
+            } else {
+                return String.valueOf(average);
+            }
+        }
+
+        public void setAverageStr(String averageStr) {
+            this.averageStr = averageStr;
+        }
+
+        public Float getRatingStar() {
+            return average / 2;
+        }
+
+        public void setRatingStar(Float ratingStar) {
+            this.ratingStar = ratingStar;
+        }
 
         public Integer getMax() {
             return max;

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/movie_version_public_release"
+        android:orderInCategory="1"
+        android:title="@string/public_release" />
+    <item
+        android:id="@+id/movie_version_directors_cut"
+        android:orderInCategory="2"
+        android:title="@string/directors_cut" />
+    <item
+        android:id="@+id/movie_version_extended_edition"
+        android:orderInCategory="3"
+        android:title="@string/extended_edition" />
+    <item
+        android:id="@+id/movie_version_other"
+        android:orderInCategory="4"
+        android:title="@string/other" />
+</menu>

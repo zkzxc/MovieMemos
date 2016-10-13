@@ -1,17 +1,16 @@
 package com.zk.moviememos.view.fragment;
 
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Parcelable;
+import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v4.util.Pair;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -21,20 +20,13 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.animation.GlideAnimation;
-import com.bumptech.glide.request.target.SimpleTarget;
 import com.zk.moviememos.App;
 import com.zk.moviememos.R;
 import com.zk.moviememos.contract.SearchMoviesContract;
 import com.zk.moviememos.databinding.FragmentSearchBinding;
-import com.zk.moviememos.model.DoubanMovieModel;
-import com.zk.moviememos.model.MovieModel;
-import com.zk.moviememos.po.DoubanMovie;
-import com.zk.moviememos.util.BitmapUtils;
-import com.zk.moviememos.util.LogUtils;
 import com.zk.moviememos.util.ResourseUtils;
 import com.zk.moviememos.view.Adapter.SimpleDoubanMovieAdapter;
+import com.zk.moviememos.view.activity.MainActivity;
 import com.zk.moviememos.view.activity.MovieActivity;
 import com.zk.moviememos.vo.SimpleDoubanMovie;
 
@@ -46,6 +38,8 @@ import java.util.List;
  */
 public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Presenter> implements
         SearchMoviesContract.View {
+
+    public static final String TAG = "SearchMovieFragment";
 
     public static final String ARGUMENT = "argument";
 
@@ -84,8 +78,7 @@ public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Pres
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
-            savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FragmentSearchBinding fragmentSearchBinding = FragmentSearchBinding.inflate(inflater, container, false);
         rvResults = fragmentSearchBinding.rvResults;
         llBeforeSearch = fragmentSearchBinding.llBeforeSearch;
@@ -125,7 +118,6 @@ public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Pres
         super.onCreateOptionsMenu(menu, inflater);
     }
 
-
     @Override
     public void showResults(List<SimpleDoubanMovie> movies) {
         if (isActive()) {
@@ -142,11 +134,14 @@ public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Pres
     }
 
     @Override
-    public void showItem(String movieId, String title, String posterUrl, ImageView imageView, String transitionName) {
+    public void showItem(String todo, String movieId, String title, boolean isTv, String posterUrl, ImageView
+            imageView, String transitionName) {
         Bundle bundle = new Bundle();
         bundle.putString("movieId", movieId);
         bundle.putString("title", title);
+        bundle.putBoolean("isTv", isTv);
         bundle.putString("posterUrl", posterUrl);
+        bundle.putString("todo", todo);
         Intent intent = new Intent(mActivity, MovieActivity.class);
         intent.putExtras(bundle);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -184,4 +179,17 @@ public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Pres
         mSearchView.clearFocus();
     }
 
+    @Override
+    public void showProgress() {
+        if (isActive() && mActivity != null) {
+            ((MainActivity) mActivity).showProgress();
+        }
+    }
+
+    @Override
+    public void hideProgress() {
+        if (isActive() && mActivity != null) {
+            ((MainActivity) mActivity).hideProgress();
+        }
+    }
 }

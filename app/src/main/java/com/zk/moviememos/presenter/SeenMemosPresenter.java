@@ -2,13 +2,17 @@ package com.zk.moviememos.presenter;
 
 import android.os.Handler;
 import android.os.Looper;
-import android.os.SystemClock;
 
+import com.zk.moviememos.constants.BusinessConstans;
 import com.zk.moviememos.contract.SeenMemosContract;
+import com.zk.moviememos.model.LocalMemoModel;
 import com.zk.moviememos.model.MemoModel;
-import com.zk.moviememos.po.Memo;
-import com.zk.moviememos.view.fragment.SeenMemosFragment;
+import com.zk.moviememos.util.LogUtils;
+import com.zk.moviememos.vo.SimpleMovieMemo;
 
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -42,42 +46,68 @@ public class SeenMemosPresenter implements SeenMemosContract.Presenter {
     @Override
     public void loadMemos(boolean forceUpdate) {
         mView.showProgress();
-        mMemoModel.loadMemos(new MemoModel.LoadMemosCallback() {
-            @Override
-            public void onMemosLoaded(final List<Memo> memos) {
-                new Thread(new Runnable() {
+        mMemoModel.loadSeenMemos(null, 20, 0, LocalMemoModel.MOVIE_MEMO_COLUMN_VIEWING_DATE,
+                BusinessConstans.ORDER_WAY_DESC, new MemoModel.LoadMemosCallback() {
                     @Override
-                    public void run() {
-                        SystemClock.sleep(2000);
-
+                    public void onMemosLoaded(final List<SimpleMovieMemo> memos) {
                         Handler handler = new Handler(Looper.getMainLooper());
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
-                                mView.hideProgress();
-                                if (!((SeenMemosFragment) mView).isAdded()) {
-                                    return;
-                                } else {
+                                if (mView.isActive()) {
+                                    mView.hideProgress();
                                     if (memos.isEmpty()) {
                                         mView.showNoMemo();
                                     } else {
-                                        // TODO: 2016/7/23 展示已看记录列表
-
+                                        List<SimpleMovieMemo> headerMemos = addSections(memos,
+                                                LocalMemoModel.MOVIE_MEMO_COLUMN_VIEWING_DATE);
+                                        mView.showSeenMemos(headerMemos);
+                                        //mView.showSeenMemos(memos);
                                     }
-
                                 }
-
                             }
                         });
+                    }
+
+                    @Override
+                    public void onDataNotAvailable() {
 
                     }
-                }).start();
-            }
+                });
+    }
 
-            @Override
-            public void onDataNotAvailable() {
-
+    private List<SimpleMovieMemo> addSections(List<SimpleMovieMemo> memos, String orderBy) {
+        List<SimpleMovieMemo> sectionMemos = new ArrayList<>();
+        String sectionText = null;
+        SimpleMovieMemo lastSectionMemo = null;     // 记录上一个sectionMemo
+        int sectionTextRight = 0;   // section右侧的文字，用来记录该section中有几个item
+        for (int i = 0; i < memos.size(); i++) {
+            SimpleMovieMemo memo = memos.get(i);
+            memo.setViewType(SimpleMovieMemo.VIEW_TYPE_ITEM);
+            sectionTextRight++;
+            if (orderBy == LocalMemoModel.MOVIE_MEMO_COLUMN_VIEWING_DATE) {
+                Date viewingDate = memo.getViewingDate();
+                Calendar calendar = Calendar.getInstance();
+                calendar.setTime(viewingDate);
+                String viewingYear = String.valueOf(calendar.get(Calendar.YEAR));
+                if (!viewingYear.equals(sectionText)) {
+                    if (i != 0) {
+                        // 设置上一个section的sectionTextRight
+                        lastSectionMemo.setSectionTextRight(String.valueOf(--sectionTextRight));
+                        sectionTextRight = 1;
+                    }
+                    SimpleMovieMemo sectionMemo = new SimpleMovieMemo();
+                    lastSectionMemo = sectionMemo;
+                    sectionText = viewingYear;
+                    sectionMemo.setViewType(SimpleMovieMemo.VIEW_TYPE_SECTION);
+                    sectionMemo.setSectionTextLeft(sectionText);
+                    sectionMemos.add(sectionMemo);
+                }
             }
-        });
+            sectionMemos.add(memo);
+        }
+        lastSectionMemo.setSectionTextRight(String.valueOf(sectionTextRight)); // 设置最后一个section的sectionTextRight
+        LogUtils.d(this, "memos' size after addSection:    " + sectionMemos.size());
+        return sectionMemos;
     }
 }

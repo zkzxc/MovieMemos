@@ -6,12 +6,13 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/rv_memoList"
+        <com.zk.moviememos.widget.PinnedSectionListView
+            android:id="@+id/lv_memoList"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-        </android.support.v7.widget.RecyclerView>
+            android:layout_height="wrap_content"
+            android:divider="@null"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        </com.zk.moviememos.widget.PinnedSectionListView>
 
         <LinearLayout
             android:id="@+id/ll_noMemo"
@@ -45,19 +46,6 @@
                 android:layout_marginTop="8dp"
                 android:text="@string/add_memo_hint" />
         </LinearLayout>
-
-        <android.support.design.widget.FloatingActionButton
-            android:id="@+id/fab"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:layout_alignParentRight="true"
-            android:layout_margin="16dp"
-            android:src="@drawable/ic_add"
-            app:fabSize="normal"
-            app:layout_anchor="@id/cl"
-            app:layout_anchorGravity="bottom|right|end"
-            app:rippleColor="?colorPrimary" />
 
     </RelativeLayout>
 

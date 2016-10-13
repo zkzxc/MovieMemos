@@ -35,7 +35,6 @@ public class DisplayUtils {
      */
     public static int dip2px(Context context, float dipValue) {
         final float scale = context.getResources().getDisplayMetrics().density;
-        LogUtils.d(null,"scale = " +  scale);
         return (int) (dipValue * scale + 0.5f);
     }
 
@@ -58,7 +57,6 @@ public class DisplayUtils {
      */
     public static int sp2px(Context context, float spValue) {
         final float fontScale = context.getResources().getDisplayMetrics().scaledDensity;
-        LogUtils.d(null,"fontScale = " +  fontScale);
         return (int) (spValue * fontScale + 0.5f);
     }
 
@@ -85,6 +83,11 @@ public class DisplayUtils {
         return wm.getDefaultDisplay().getWidth();
     }
 
+    /**
+     * 获取屏幕高度,单位是px
+     * @param context
+     * @return
+     */
     public static int getWindowHeight(Context context) {
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         return wm.getDefaultDisplay().getHeight();

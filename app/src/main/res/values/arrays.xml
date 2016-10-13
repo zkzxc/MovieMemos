@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="viewing_way">
+        <item>电影院</item>
+        <item>下载</item>
+        <item>在线观看</item>
+        <item>DVD</item>
+        <item>电视台</item>
+        <item>其他</item>
+    </string-array>
+
+    <string-array name="viewing_way_tv">
+        <item>在线观看</item>
+        <item>下载</item>
+        <item>电视台</item>
+        <item>DVD</item>
+        <item>其他</item>
+    </string-array>
+
+    <string-array name="viewing_version_1">
+        <item>普通</item>
+        <item>IMAX</item>
+        <item>中国巨幕</item>
+        <item>其他</item>
+    </string-array>
+
+    <string-array name="viewing_version_2">
+        <item>2D</item>
+        <item>3D</item>
+        <item>其他</item>
+    </string-array>
+
+    <string-array name="movie_version">
+        <item>公映版</item>
+        <item>导演剪辑版</item>
+        <item>加长版</item>
+        <item>其他</item>
+    </string-array>
+</resources>

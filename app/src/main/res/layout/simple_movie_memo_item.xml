@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <data>
+
+        <import type="android.view.View" />
+
+        <variable
+            name="simpleMovieMemo"
+            type="com.zk.moviememos.vo.SimpleMovieMemo" />
+    </data>
+<LinearLayout
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+    <android.support.v7.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="4dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <ImageView
+            android:id="@+id/iv_title_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingBottom="3dp"
+                android:paddingTop="3dp">
+
+                <TextView
+                    android:layout_width="75dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="@{simpleMovieMemo.viewingMonthAndDate}"
+                    android:textColor="@color/white"
+                    android:textSize="16dp" />
+
+                <RelativeLayout
+                    android:id="@+id/rl_first_line"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingLeft="16dp"
+                    android:paddingRight="12dp">
+
+                    <LinearLayout
+                        android:id="@+id/ll_title_year"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_movie_title"
+                            style="@style/TextAppearance.AppCompat.Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:lines="1"
+                            android:text="@{simpleMovieMemo.title}"
+                            android:textColor="@color/white"
+                            android:textSize="16sp" />
+
+                        <TextView
+                            android:id="@+id/tv_year"
+                            style="@style/TextAppearance.AppCompat.Title"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="right"
+                            android:text="@{simpleMovieMemo.year}"
+                            android:textColor="@color/white"
+                            android:textSize="16sp" />
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_rating"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_alignParentRight="true"
+                        android:layout_marginLeft="8dp"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_TV"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/TV_tag"
+                            android:textAppearance="@style/TextAppearance.AppCompat.Button"
+                            android:textColor="?colorAccent"
+                            android:textSize="16sp"
+                            android:visibility="@{simpleMovieMemo.tv ? View.VISIBLE : View.GONE}" />
+
+                        <TextView
+                            android:id="@+id/tv_rating"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="8dp"
+                            android:paddingLeft="3dp"
+                            android:paddingRight="3dp"
+                            android:text="@{simpleMovieMemo.averageScore}"
+                            android:textColor="?colorAccent"
+                            android:textSize="16sp" />
+                    </LinearLayout>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <ImageView
+                    android:id="@+id/iv_movie_image_large"
+                    android:layout_width="75dp"
+                    android:layout_height="110dp"
+                    android:paddingBottom="0dp"
+                    android:paddingTop="0dp"
+                    android:scaleType="fitXY" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/grey_100"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_original_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:lines="1"
+                        android:paddingBottom="2dp"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:paddingTop="4dp"
+                        android:text="@{simpleMovieMemo.original_title}"
+                        android:textSize="13sp" />
+
+                    <LinearLayout
+                        android:id="@+id/ll_directors_casts"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:lines="1"
+                            android:paddingBottom="2dp"
+                            android:paddingRight="10dp"
+                            android:text="@{simpleMovieMemo.directors}"
+                            android:textSize="13sp"
+                            android:visibility="@{simpleMovieMemo.directors == null ? View.GONE : View.VISIBLE}" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:lines="1"
+                            android:paddingBottom="2dp"
+                            android:text="@{simpleMovieMemo.casts}"
+                            android:textSize="13sp"
+                            android:visibility="@{simpleMovieMemo.casts == null ? View.GONE : View.VISIBLE}" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/ll_movie_version_viewing_version"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:lines="1"
+                            android:paddingBottom="2dp"
+                            android:paddingRight="10dp"
+                            android:text="@{simpleMovieMemo.movieVersion}"
+                            android:textSize="13sp"
+                            android:visibility="@{simpleMovieMemo.tv ? View.GONE : View.VISIBLE}" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:lines="1"
+                            android:paddingBottom="2dp"
+                            android:text="@{simpleMovieMemo.viewingVersion1}"
+                            android:textSize="13sp"
+                            android:visibility="@{simpleMovieMemo.tv ? View.GONE : View.VISIBLE}" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:lines="1"
+                            android:paddingBottom="2dp"
+                            android:text="@{simpleMovieMemo.viewingVersion2}"
+                            android:textSize="13sp"
+                            android:visibility="@{simpleMovieMemo.tv ? View.GONE : View.VISIBLE}" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/tv_short_comment"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:lineSpacingMultiplier="1.1"
+                        android:maxLines="2"
+                        android:paddingBottom="2dp"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:text="@{simpleMovieMemo.shortComment ?? simpleMovieMemo.NO_SHORT_COMMENT}"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+    </android.support.v7.widget.CardView>
+</LinearLayout>
+</layout>

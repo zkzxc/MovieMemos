@@ -13,6 +13,8 @@ import com.zk.moviememos.contract.TopContract;
  */
 public class TopFragment extends BaseFragment<TopContract.Presenter> {
 
+    public static final String TAG = "TopFragment";
+
     private static TopFragment mFragment;
 
     public TopFragment(){

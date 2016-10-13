@@ -1,120 +1,391 @@
 package com.zk.moviememos.view.activity;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
+import android.content.DialogInterface;
 import android.databinding.DataBindingUtil;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.LinearInterpolator;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.zk.moviememos.App;
 import com.zk.moviememos.R;
+import com.zk.moviememos.contract.MovieContract;
 import com.zk.moviememos.databinding.ActivityMovieBinding;
 import com.zk.moviememos.model.DoubanMovieModel;
-import com.zk.moviememos.model.MovieModel;
+import com.zk.moviememos.model.LocalMemoModel;
 import com.zk.moviememos.po.DoubanMovie;
+import com.zk.moviememos.po.Memo;
+import com.zk.moviememos.presenter.AddEditMemoPresenter;
+import com.zk.moviememos.presenter.MemoDetailPresenter;
+import com.zk.moviememos.presenter.MovieDetailPresenter;
+import com.zk.moviememos.presenter.MoviePresenter;
 import com.zk.moviememos.util.BitmapUtils;
+import com.zk.moviememos.util.DisplayUtils;
+import com.zk.moviememos.util.FragmentUtils;
 import com.zk.moviememos.util.LogUtils;
+import com.zk.moviememos.util.ResourseUtils;
+import com.zk.moviememos.view.Adapter.SimpleDoubanMovieAdapter;
+import com.zk.moviememos.view.fragment.AddEditMemoFragment;
+import com.zk.moviememos.view.fragment.BaseFragment;
+import com.zk.moviememos.view.fragment.MemoDetailFragment;
+import com.zk.moviememos.view.fragment.MovieDetailFragment;
+import com.zk.moviememos.view.fragment.SeenMemosFragment;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
  */
-public class MovieActivity extends AppCompatActivity {
+public class MovieActivity extends AppCompatActivity implements MovieContract.View {
 
+    public static final String MOVIE_DETAIL_FRAGMENT_TAG = "movie_detail_fragment_tag";
+    public static final String ADD_EDIT_MEMO_FRAGMENT_TAG = "add_edit_memo_fragment_tag";
+    public static final String MEMO_DETAIL_FRAGMENT_TAG = "memo_detail_fragment_tag";
+
+    private MovieContract.Presenter mPresenter;
+    private boolean mShown;
     private ActivityMovieBinding binding;
 
+    private DoubanMovie mDoubanMovie;
     private Drawable mediumPoster;
+
+    private FragmentManager fragmentManager;
+    private BaseFragment mFramgent;
+    private BaseFragment lastFragment;
+    private MovieDetailFragment movieDetailFragment;
+    private AddEditMemoFragment addEditMemoFragment;
+    private MemoDetailFragment memoDetailFragment;
+    private MovieDetailPresenter movieDetailPresenter;
+    private AddEditMemoPresenter addEditMemoPresenter;
+    private MemoDetailPresenter memoDetailPresenter;
+
+    private FrameLayout flProgress;
+    private ObjectAnimator mProgressAnimator;
+
+    private String movieId;
+    private String todo;
+    private boolean isTv;
+    private String memoId;
+
+    private Memo newMemo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_movie);
+        fragmentManager = getSupportFragmentManager();
 
         setSupportActionBar(binding.toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+
         Bundle bundle = getIntent().getExtras();
-        String movieId = bundle.getString("movieId");
+        movieId = bundle.getString("movieId");
+        todo = bundle.getString("todo");
+        isTv = bundle.getBoolean("isTv");
+        memoId = bundle.getString("memoId");
         String title = bundle.getString("title");
-        String mediumPosterUrl = bundle.getString("posterUrl");
+        String posterUrl = bundle.getString("posterUrl");
         binding.collapsingToolbar.setTitle(title);
-        Glide.with(this).load(mediumPosterUrl).asBitmap().priority(Priority.HIGH).into(new SimpleTarget<Bitmap>(100,150) {
+
+        initCollapsingToolbar(posterUrl);
+
+        if (savedInstanceState == null) {
+            if (todo.equals(SimpleDoubanMovieAdapter.SHOW_MOVIE_DETAIL)) {
+                showMovieDetailFragment();
+            } else if (todo.equals(SimpleDoubanMovieAdapter.ADD_MEMO)) {
+                showAddEditMemoFragment();
+            } else if (todo.equals(SeenMemosFragment.SHOW_MEMO)) {
+                showMemoDetailFragment();
+            }
+        }
+        if (mFramgent == movieDetailFragment) {
+            binding.llMovieDetailBtns.setVisibility(View.VISIBLE);
+            binding.llAddEditMemoBtns.setVisibility(View.GONE);
+            binding.llMemoDetailBtns.setVisibility(View.GONE);
+        } else if (mFramgent == addEditMemoFragment) {
+            binding.llMovieDetailBtns.setVisibility(View.GONE);
+            binding.llAddEditMemoBtns.setVisibility(View.VISIBLE);
+            binding.llMemoDetailBtns.setVisibility(View.GONE);
+        } else if (mFramgent == memoDetailFragment) {
+            binding.llMovieDetailBtns.setVisibility(View.GONE);
+            binding.llAddEditMemoBtns.setVisibility(View.GONE);
+            binding.llMemoDetailBtns.setVisibility(View.VISIBLE);
+        }
+
+        flProgress = binding.flProgress;
+        ImageView ivProgress = binding.ivProgress;
+        mProgressAnimator = ObjectAnimator.ofFloat(ivProgress, "rotation", 0f, 360f);
+        mProgressAnimator.setDuration(1000);
+        mProgressAnimator.setRepeatCount(ValueAnimator.INFINITE);
+        mProgressAnimator.setInterpolator(new LinearInterpolator());
+
+        binding.btnAddToSeen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAddEditMemoFragment();
+                binding.llMovieDetailBtns.setVisibility(View.GONE);
+                binding.llAddEditMemoBtns.setVisibility(View.VISIBLE);
+            }
+        });
+        binding.btnCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                newMemo = null;
+                MovieActivity.this.onBackPressed();
+            }
+        });
+        binding.btnSave.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    addEditMemoPresenter.saveMemo(mDoubanMovie, newMemo);
+                    Toast.makeText(MovieActivity.this, ResourseUtils.getString(R.string.save_success),
+                            Toast.LENGTH_SHORT).show();
+                    fragmentManager.popBackStack();
+                } catch (Exception e) {
+                    Toast.makeText(MovieActivity.this, ResourseUtils.getString(R.string.save_failure),
+                            Toast.LENGTH_SHORT).show();
+                    e.printStackTrace();
+                }
+            }
+        });
+        binding.btnMovieDetail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showMovieDetailFragment();
+                binding.llMemoDetailBtns.setVisibility(View.GONE);
+                binding.llMovieDetailBtns.setVisibility(View.VISIBLE);
+            }
+        });
+        binding.btnEditMemo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showAddEditMemoFragment();
+                binding.llMemoDetailBtns.setVisibility(View.GONE);
+                binding.llAddEditMemoBtns.setVisibility(View.VISIBLE);
+            }
+        });
+        binding.btnDeleteMemo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final AlertDialog.Builder builder = new AlertDialog.Builder(MovieActivity.this);
+                builder.setMessage(R.string.delete_memo_message);
+                builder.setPositiveButton(R.string.delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        memoDetailPresenter.deleteMemo(memoId);
+                        Toast.makeText(MovieActivity.this, R.string.delete_success, Toast.LENGTH_SHORT).show();
+                        MovieActivity.this.finish();
+                    }
+                });
+                builder.setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.dismiss();
+                    }
+                });
+                builder.show();
+            }
+        });
+
+        MoviePresenter moviePresenter = MoviePresenter.getInstance(DoubanMovieModel.getInstance(),
+                LocalMemoModel.getInstance(this), this, movieId);
+        moviePresenter.getMovie(todo);
+    }
+
+    private void initCollapsingToolbar(String PosterUrl) {
+        Glide.with(this).load(PosterUrl).asBitmap().priority(Priority.HIGH).into(new SimpleTarget<Bitmap>(100,
+                150) {
             @Override
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                 mediumPoster = new BitmapDrawable(resource);
-                LogUtils.d(this, resource.getHeight() + "!!!!!!");
                 binding.ivMovieImageLarge.setImageBitmap(resource);
                 Bitmap blurredPoster = BitmapUtils.doBlur(resource, 20, false);
                 blurredPoster = BitmapUtils.setBrightness(blurredPoster, -40);
-                binding.ivMovieImageLargeBlur.setImageBitmap(blurredPoster);
+                final ImageView ivBlurredPoster = binding.ivMovieImageLargeBlur;
+                ivBlurredPoster.setImageBitmap(blurredPoster);
+
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                    ivBlurredPoster.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                        @Override
+                        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int
+                                oldTop, int oldRight, int oldBottom) {
+                            v.removeOnLayoutChangeListener(this);
+                            float radius = (float) Math.hypot(ivBlurredPoster.getWidth(), ivBlurredPoster.getHeight());
+                            Animator reveal = null;
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                                reveal = ViewAnimationUtils.createCircularReveal(ivBlurredPoster, 0, DisplayUtils
+                                        .dip2px(MovieActivity.this, 340), 0, radius);
+                            }
+                            reveal.setDuration(500);
+                            reveal.setInterpolator(new AccelerateInterpolator());
+                            reveal.start();
+                            reveal.addListener(new Animator.AnimatorListener() {
+                                @Override
+                                public void onAnimationStart(Animator animation) {
+
+                                }
+
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    binding.llMovieIntro.setVisibility(View.VISIBLE);
+                                }
+
+                                @Override
+                                public void onAnimationCancel(Animator animation) {
+
+                                }
+
+                                @Override
+                                public void onAnimationRepeat(Animator animation) {
+
+                                }
+                            });
+                        }
+                    });
+                }
             }
         });
-        DoubanMovieModel.getInstance().getMovieById(movieId, new MovieModel.GetMovieCallBack() {
-            @Override
-            public void onSuccess(DoubanMovie doubanMovie) {
-                binding.setDoubanMovie(doubanMovie);
-                Glide.with(MovieActivity.this).load(doubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
-                        .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);
+    }
 
-                LinearLayout llCelebrities = (LinearLayout) findViewById(R.id.ll_celebrities);
-                if (doubanMovie.getDirectors() != null) {
-                    for (int i = 0; i < doubanMovie.getDirectors().size(); i++) {
-                        View celebrityItem = View.inflate(MovieActivity.this, R.layout.celebrity_item, null);
-                        TextView tvCelebrityTag = (TextView) celebrityItem.findViewById(R.id.tv_celebrity_tag);
-                        if (i == 0) {
-                            tvCelebrityTag.setText("导演");
-                        }
-                        ImageView ivCelebrityImg = (ImageView) celebrityItem.findViewById(R.id.iv_celebrity_img);
-                        if (doubanMovie.getDirectors().get(i).getAvatars() != null) {
-                            Glide.with(MovieActivity.this).load(doubanMovie.getDirectors().get(i).getAvatars()
-                                    .getMedium()).priority(Priority.LOW).centerCrop().into(ivCelebrityImg);
-                        }
-                        TextView tvCelebrityName = (TextView) celebrityItem.findViewById(R.id.tv_celebrity_name);
-                        tvCelebrityName.setText(doubanMovie.getDirectors().get(i).getName());
-                        llCelebrities.addView(celebrityItem);
-                    }
-                }
-                if (doubanMovie.getCasts() != null) {
-                    for (int i = 0; i < doubanMovie.getCasts().size(); i++) {
-                        View celebrityItem = View.inflate(MovieActivity.this, R.layout.celebrity_item, null);
-                        TextView tvCelebrityTag = (TextView) celebrityItem.findViewById(R.id.tv_celebrity_tag);
-                        if (i == 0) {
-                            tvCelebrityTag.setText("主演");
-                        }
-                        ImageView ivCelebrityImg = (ImageView) celebrityItem.findViewById(R.id.iv_celebrity_img);
-                        if (doubanMovie.getCasts().get(i).getAvatars() != null) {
-                            Glide.with(MovieActivity.this).load(doubanMovie.getCasts().get(i).getAvatars().getMedium
-                                    ()).priority(Priority.LOW).centerCrop().into(ivCelebrityImg);
-                        }
-                        TextView tvCelebrityName = (TextView) celebrityItem.findViewById(R.id.tv_celebrity_name);
-                        tvCelebrityName.setText(doubanMovie.getCasts().get(i).getName());
-                        llCelebrities.addView(celebrityItem);
-                    }
-                }
-                TextView buttonAddToSeen = (TextView) findViewById(R.id.bn_add_to_seen);
-                buttonAddToSeen.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Toast.makeText(App.getContext(), "add to seen", Toast.LENGTH_SHORT).show();
-                    }
-                });
+    private void showMovieDetailFragment() {
+        movieDetailFragment = (MovieDetailFragment) fragmentManager.findFragmentByTag(MOVIE_DETAIL_FRAGMENT_TAG);
+        if (movieDetailFragment == null) {
+            movieDetailFragment = MovieDetailFragment.getInstance("arg");
+            movieDetailPresenter = MovieDetailPresenter.getInstance(LocalMemoModel.getInstance(this),
+                    movieDetailFragment, movieId);
+            if (mFramgent == null) {
+                FragmentUtils.addfragment(fragmentManager, movieDetailFragment, R.id.fl_movie_detail,
+                        MOVIE_DETAIL_FRAGMENT_TAG);
+            } else {
+                FragmentUtils.switchFragment(fragmentManager, mFramgent, movieDetailFragment,
+                        MOVIE_DETAIL_FRAGMENT_TAG, true);
+                lastFragment = mFramgent;
             }
+        } else {
+            FragmentUtils.switchFragment(fragmentManager, mFramgent, movieDetailFragment,
+                    MOVIE_DETAIL_FRAGMENT_TAG, true);
+            lastFragment = mFramgent;
+        }
+        mFramgent = movieDetailFragment;
+    }
 
-            @Override
-            public void onFailure() {
-
+    private void showAddEditMemoFragment() {
+        addEditMemoFragment = (AddEditMemoFragment) fragmentManager.findFragmentByTag
+                (ADD_EDIT_MEMO_FRAGMENT_TAG);
+        if (addEditMemoFragment == null) {
+            newMemo = new Memo();
+            addEditMemoFragment = AddEditMemoFragment.getInstance(isTv);
+            addEditMemoPresenter = AddEditMemoPresenter.getInstance(LocalMemoModel.getInstance(this),
+                    addEditMemoFragment, memoId);
+            if (mFramgent == null) {
+                FragmentUtils.addfragment(fragmentManager, addEditMemoFragment, R.id.fl_movie_detail,
+                        ADD_EDIT_MEMO_FRAGMENT_TAG);
+            } else {
+                FragmentUtils.switchFragment(fragmentManager, mFramgent, addEditMemoFragment,
+                        ADD_EDIT_MEMO_FRAGMENT_TAG, true);
+                lastFragment = mFramgent;
             }
-        });
+        } else {
+            FragmentUtils.switchFragment(fragmentManager, mFramgent, addEditMemoFragment,
+                    ADD_EDIT_MEMO_FRAGMENT_TAG, true);
+            lastFragment = mFramgent;
+        }
+        mFramgent = addEditMemoFragment;
+    }
+
+    private void showMemoDetailFragment() {
+        memoDetailFragment = (MemoDetailFragment) fragmentManager.findFragmentByTag(MEMO_DETAIL_FRAGMENT_TAG);
+        if (memoDetailFragment == null) {
+            memoDetailFragment = MemoDetailFragment.getInstance();
+            memoDetailPresenter = MemoDetailPresenter.getInstance(LocalMemoModel.getInstance(this),
+                    memoDetailFragment, memoId);
+            if (mFramgent == null) {
+                FragmentUtils.addfragment(fragmentManager, memoDetailFragment, R.id.fl_movie_detail,
+                        MEMO_DETAIL_FRAGMENT_TAG);
+            } else {
+                FragmentUtils.switchFragment(fragmentManager, mFramgent, memoDetailFragment,
+                        MEMO_DETAIL_FRAGMENT_TAG, true);
+                lastFragment = mFramgent;
+            }
+        } else {
+            FragmentUtils.switchFragment(fragmentManager, mFramgent, memoDetailFragment,
+                    MEMO_DETAIL_FRAGMENT_TAG, true);
+            lastFragment = mFramgent;
+        }
+        mFramgent = memoDetailFragment;
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+    }
+
+    @Override
+    public void onBackPressed() {
+        LogUtils.d(this, "fragment num:              " + fragmentManager.getFragments().size());
+        if (fragmentManager.getFragments().size() > 1) {
+            if (mFramgent == addEditMemoFragment) {
+                binding.llAddEditMemoBtns.setVisibility(View.GONE);
+                if (lastFragment == movieDetailFragment) {
+                    binding.llMovieDetailBtns.setVisibility(View.VISIBLE);
+                } else if (lastFragment == memoDetailFragment) {
+                    binding.llMemoDetailBtns.setVisibility(View.VISIBLE);
+                }
+            } else if (mFramgent == movieDetailFragment) {
+                binding.llMovieDetailBtns.setVisibility(View.GONE);
+                binding.llMemoDetailBtns.setVisibility(View.VISIBLE);
+            }
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    public void showMovie(DoubanMovie doubanMovie) {
+        if (isActive()) {
+            binding.flMovieDetail.setVisibility(View.VISIBLE);
+            mDoubanMovie = doubanMovie;
+            binding.setDoubanMovie(doubanMovie);
+            Glide.with(MovieActivity.this).load(doubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
+                    .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);
+            if (todo.equals(SimpleDoubanMovieAdapter.SHOW_MOVIE_DETAIL)) {
+                movieDetailPresenter.getMemosByMovieId();
+                ((MovieDetailFragment) movieDetailFragment).showMovieDetail(doubanMovie);
+            }
+//            else if (todo.equals(SimpleDoubanMovieAdapter.ADD_MEMO)) {
+//                showAddEditMemoFragment();
+//            } else if (todo.equals(SeenMemosFragment.SHOW_MEMO)) {
+//                showMemoDetailFragment();
+//            }
+        }
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mShown = true;
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mShown = false;
     }
 
     @Override
@@ -126,4 +397,41 @@ public class MovieActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    public void setPresenter(MovieContract.Presenter presenter) {
+        this.mPresenter = presenter;
+    }
+
+    @Override
+    public void showProgress() {
+        if (isActive()) {
+            if (!flProgress.isShown()) {
+                flProgress.setVisibility(View.VISIBLE);
+            }
+            mProgressAnimator.start();
+        }
+    }
+
+    @Override
+    public void hideProgress() {
+        if (isActive()) {
+            if (mProgressAnimator.isRunning()) {
+                mProgressAnimator.end();
+            }
+            if (flProgress.isShown()) {
+                flProgress.setVisibility(View.GONE);
+            }
+        }
+    }
+
+    @Override
+    public boolean isActive() {
+        return mShown;
+    }
+
+    public Memo getNewMemo() {
+        return newMemo;
+    }
+
 }

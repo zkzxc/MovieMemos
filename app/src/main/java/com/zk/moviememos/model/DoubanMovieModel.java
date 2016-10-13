@@ -1,5 +1,9 @@
 package com.zk.moviememos.model;
 
+import android.widget.Toast;
+
+import com.zk.moviememos.App;
+import com.zk.moviememos.R;
 import com.zk.moviememos.constants.DefaultConfigs;
 import com.zk.moviememos.po.DoubanMovie;
 import com.zk.moviememos.util.LogUtils;
@@ -21,7 +25,8 @@ public class DoubanMovieModel implements MovieModel {
 
     private static DoubanMovieModel mModel;
 
-    private DoubanMovieModel(){}
+    private DoubanMovieModel() {
+    }
 
     public static DoubanMovieModel getInstance() {
         if (mModel == null) {
@@ -59,8 +64,14 @@ public class DoubanMovieModel implements MovieModel {
         call.enqueue(new Callback<DoubanMovie>() {
             @Override
             public void onResponse(Call<DoubanMovie> call, Response<DoubanMovie> response) {
-                LogUtils.i(this, "response::::::" + response.body().getTitle());
-                callBack.onSuccess(response.body());
+                if (response.code() != 200) {
+                    LogUtils.i(this, "code::::::" + response.code() + "     message::::::" + response.message());
+                    Toast.makeText(App.getContext(), R.string.movie_item_not_available, Toast.LENGTH_SHORT).show();
+                    return;
+                } else {
+                    LogUtils.i(this, "response::::::" + response.body().getTitle());
+                    callBack.onSuccess(response.body());
+                }
             }
 
             @Override

@@ -13,6 +13,8 @@ import com.zk.moviememos.contract.TagContract;
  */
 public class TagFragment extends BaseFragment<TagContract.Presenter> {
 
+    public static final String TAG = "TagFragment";
+
     private static TagFragment mFragment;
 
     public TagFragment(){
