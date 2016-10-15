@@ -21,6 +21,7 @@ public class SimpleMovieMemo {
     private String movieId;
     private String title;
     private String original_title;
+    private String pinyin_title;
     private Images images;
     private Rating rating;
     private String year;
@@ -171,6 +172,14 @@ public class SimpleMovieMemo {
 
     public void setOriginal_title(String original_title) {
         this.original_title = original_title;
+    }
+
+    public String getPinyin_title() {
+        return pinyin_title;
+    }
+
+    public void setPinyin_title(String pinyin_title) {
+        this.pinyin_title = pinyin_title;
     }
 
     public Images getImages() {

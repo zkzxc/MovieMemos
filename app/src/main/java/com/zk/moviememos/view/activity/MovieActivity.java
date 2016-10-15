@@ -82,6 +82,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
     private boolean isTv;
     private String memoId;
 
+    private Memo memo;
     private Memo newMemo;
 
     @Override
@@ -204,8 +205,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
             }
         });
 
-        MoviePresenter moviePresenter = MoviePresenter.getInstance(DoubanMovieModel.getInstance(),
-                LocalMemoModel.getInstance(this), this, movieId);
+        MoviePresenter moviePresenter = MoviePresenter.getInstance(DoubanMovieModel.getInstance(), this, movieId, memo);
         moviePresenter.getMovie(todo);
     }
 
@@ -329,6 +329,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
                     MEMO_DETAIL_FRAGMENT_TAG, true);
             lastFragment = mFramgent;
         }
+        this.memo = memoDetailPresenter.getMemo();
         mFramgent = memoDetailFragment;
     }
 
@@ -358,22 +359,22 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
 
     @Override
     public void showMovie(DoubanMovie doubanMovie) {
-        if (isActive()) {
-            binding.flMovieDetail.setVisibility(View.VISIBLE);
-            mDoubanMovie = doubanMovie;
-            binding.setDoubanMovie(doubanMovie);
-            Glide.with(MovieActivity.this).load(doubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
-                    .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);
-            if (todo.equals(SimpleDoubanMovieAdapter.SHOW_MOVIE_DETAIL)) {
-                movieDetailPresenter.getMemosByMovieId();
-                ((MovieDetailFragment) movieDetailFragment).showMovieDetail(doubanMovie);
-            }
-//            else if (todo.equals(SimpleDoubanMovieAdapter.ADD_MEMO)) {
-//                showAddEditMemoFragment();
-//            } else if (todo.equals(SeenMemosFragment.SHOW_MEMO)) {
-//                showMemoDetailFragment();
-//            }
-        }
+        binding.flMovieDetail.setVisibility(View.VISIBLE);
+        mDoubanMovie = doubanMovie;
+        binding.setDoubanMovie(doubanMovie);
+        Glide.with(MovieActivity.this).load(doubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
+                .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);
+        movieDetailPresenter.getMemosByMovieId();
+        movieDetailFragment.showMovieDetail(doubanMovie);
+    }
+
+    @Override
+    public void showMovieFromMemo(Memo memo) {
+        binding.flMovieDetail.setVisibility(View.VISIBLE);
+        mDoubanMovie = memo.getDoubanMovie();
+        binding.setDoubanMovie(mDoubanMovie);
+        Glide.with(MovieActivity.this).load(mDoubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
+                .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);
     }
 
     @Override

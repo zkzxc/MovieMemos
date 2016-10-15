@@ -32,8 +32,8 @@ public class MovieMemoSQLiteOpenHelper extends SQLiteOpenHelper {
 
         try {
             db.execSQL("CREATE TABLE [movie]([id] varchar(10) PRIMARY KEY,[title] varchar(256), [original_title] varchar" +
-                    "(256), [aka] varchar(1024),[mobile_url] varchar(256),[douban_score] float," +
-                    "[douban_rating_count] integer,[image_small] varchar(256),[image_medium] varchar(256)," +
+                    "(256),[pinyin_title] varchar(256) [aka] varchar(1024)," +
+                    "[douban_score] float,[image_small] varchar(256),[image_medium] varchar(256)," +
                     "[image_large] varchar(256),[subtype] char(1),[directors] varchar(256),[casts] varchar(1024)," +
                     "[year] char(4),[genres] varchar(256), [countries] varchar(256),[summary] varchar(1024)," +
                     "[seasons_count] char(2), [episodes_count] char(3), [viewing_flag] char(1));");

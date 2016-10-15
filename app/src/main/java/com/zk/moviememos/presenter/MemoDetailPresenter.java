@@ -15,6 +15,7 @@ public class MemoDetailPresenter implements MemoDetailContract.Presenter {
     private MemoModel mModel;
     private MemoDetailContract.View mView;
     private String memoId;
+    private Memo memo;
 
     public static MemoDetailPresenter getInstance(MemoModel model, MemoDetailContract.View view, String memoId) {
         MemoDetailPresenter presenter = new MemoDetailPresenter(model, view, memoId);
@@ -42,6 +43,7 @@ public class MemoDetailPresenter implements MemoDetailContract.Presenter {
                 handler.post(new Runnable() {
                     @Override
                     public void run() {
+                        MemoDetailPresenter.this.memo = memo;
                         if (mView.isActive()) {
                             mView.showMemo(memo);
                         }
@@ -59,6 +61,10 @@ public class MemoDetailPresenter implements MemoDetailContract.Presenter {
     @Override
     public void deleteMemo(String memoId) {
         mModel.deleteMemoById(memoId);
+    }
+
+    public Memo getMemo() {
+        return this.memo;
     }
 
 }

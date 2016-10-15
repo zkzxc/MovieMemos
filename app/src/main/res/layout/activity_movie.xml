@@ -240,7 +240,7 @@
                     android:id="@+id/fl_progress"
                     android:layout_width="match_parent"
                     android:layout_height="240dp"
-                    android:visibility="visible">
+                    android:visibility="gone">
 
                     <ImageView
                         android:id="@+id/iv_progress"

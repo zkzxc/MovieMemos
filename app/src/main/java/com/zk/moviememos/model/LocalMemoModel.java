@@ -56,15 +56,13 @@ public class LocalMemoModel implements MemoModel {
                             BusinessConstans.VIEWING_FLAG_SEEN, movie.getId()});
                 }
             } else {
-                db.execSQL("insert into movie values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", new Object[]{
-                        movie.getId(), movie.getTitle(), movie.getOriginal_title(), movie.getAka(), movie
-                        .getMobile_url(),
-                        movie.getRating().getAverage(), movie.getRating_count(), movie.getImages().getSmall(),
+                db.execSQL("insert into movie values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", new Object[]{
+                        movie.getId(), movie.getTitle(), movie.getOriginal_title(), movie.getPinyin_title(),
+                        movie.getAka(), movie.getRating().getAverage(), movie.getImages().getSmall(),
                         movie.getImages().getMedium(), movie.getImages().getLarge(), movie.getSubtype(),
                         movie.getDirectorsNames(), movie.getCastsNames(), movie.getYear(), movie.getGenres(),
                         movie.getCountries(), movie.getSummary(), movie.getSeasons_count(), movie.getEpisodes_count(),
-                        BusinessConstans.VIEWING_FLAG_SEEN
-                });
+                        BusinessConstans.VIEWING_FLAG_SEEN});
             }
             // 查询在memo表中是否存在未删除的该memo，存在则修改该memo，不存在则插入一条memo
             cursor = db.rawQuery("select moviememo_id from moviememo where moviememo_id = ?",
@@ -125,13 +123,12 @@ public class LocalMemoModel implements MemoModel {
     public void findMemoByMemoId(String memoId, LoadMemoCallback callback) {
         Memo memo = null;
         SQLiteDatabase db = helper.getReadableDatabase();
-        String sql = "select m.id, m.title, m.original_title, m.aka, m.douban_score, m.image_small, m.image_medium," +
-                "m.image_large, m.subtype, m.directors, m.casts, m.year, m.genres, m.countries, m.summary, " +
-                "m.seasons_count, m.episodes_count, " +
+        String sql = "select m.id, m.title, m.original_title, m.pinyin_title, m.aka, m.douban_score, m.image_small, " +
+                "m.image_medium, m.image_large, m.subtype, m.directors, m.casts, m.year, m.genres, m.countries, " +
+                "m.summary, m.seasons_count, m.episodes_count, " +
                 "mm.add_time, mm.viewing_date, mm.viewing_way, mm.viewing_version1, mm.viewing_version2, " +
-                "mm.movie_version, mm.viewing_mood, mm.story_score, mm.visual_score, mm.aural_score, mm" +
-                ".average_score," +
-                "mm.short_comment " +
+                "mm.movie_version, mm.viewing_mood, mm.story_score, mm.visual_score, mm.aural_score, " +
+                "mm.average_score, mm.short_comment " +
                 "from movie m, moviememo mm where m.id = mm.douban_movie_id and mm.is_available = 1 " +
                 "and mm.moviememo_id = " + memoId;
         LogUtils.i(this, sql);
@@ -142,46 +139,47 @@ public class LocalMemoModel implements MemoModel {
             movie.setId(cursor.getString(0));
             movie.setTitle(cursor.getString(1));
             movie.setOriginal_title(cursor.getString(2));
-            String akaStr = cursor.getString(3);
+            movie.setPinyin_title(cursor.getString(3));
+            String akaStr = cursor.getString(4);
             if (!TextUtils.isEmpty(akaStr)) {
                 movie.setAka(Arrays.asList(akaStr.split("/")));
             }
             DoubanMovie.DoubanMovieScore doubanMovieScore = movie.new DoubanMovieScore();
-            doubanMovieScore.setAverage(cursor.getFloat(4));
+            doubanMovieScore.setAverage(cursor.getFloat(5));
             movie.setRating(doubanMovieScore);
             DoubanMovie.DoubanMovieImages doubanMovieImages = movie.new DoubanMovieImages();
-            doubanMovieImages.setSmall(cursor.getString(5));
-            doubanMovieImages.setMedium(cursor.getString(6));
-            doubanMovieImages.setLarge(cursor.getString(7));
+            doubanMovieImages.setSmall(cursor.getString(6));
+            doubanMovieImages.setMedium(cursor.getString(7));
+            doubanMovieImages.setLarge(cursor.getString(8));
             movie.setImages(doubanMovieImages);
-            movie.setSubtype(cursor.getString(8));
-            movie.setDirectorsNames(cursor.getString(9));
-            movie.setCastsNames(cursor.getString(10));
-            movie.setYear(cursor.getString(11));
-            String genresStr = cursor.getString(12);
+            movie.setSubtype(cursor.getString(9));
+            movie.setDirectorsNames(cursor.getString(10));
+            movie.setCastsNames(cursor.getString(11));
+            movie.setYear(cursor.getString(12));
+            String genresStr = cursor.getString(13);
             if (!TextUtils.isEmpty(genresStr)) {
                 movie.setGenres(Arrays.asList(genresStr.split("/")));
             }
-            String countriesStr = cursor.getString(13);
+            String countriesStr = cursor.getString(14);
             if (!TextUtils.isEmpty(countriesStr)) {
                 movie.setCountries(Arrays.asList(countriesStr.split("/")));
             }
-            movie.setSummary(cursor.getString(14));
-            movie.setSeasons_count(cursor.getInt(15));
-            movie.setEpisodes_count(cursor.getString(16));
+            movie.setSummary(cursor.getString(15));
+            movie.setSeasons_count(cursor.getInt(16));
+            movie.setEpisodes_count(cursor.getString(17));
             memo.setDoubanMovie(movie);
-            memo.setAddTime(cursor.getLong(17));
-            memo.setViewingDate(cursor.getLong(18));
-            memo.setViewingWay(cursor.getString(19));
-            memo.setViewingVersion1(cursor.getString(20));
-            memo.setViewingVersion2(cursor.getString(21));
-            memo.setMovieVersion(cursor.getString(22));
-            memo.setViewingMood(cursor.getString(23));
-            memo.setStoryScore(cursor.getInt(24));
-            memo.setVisualScore(cursor.getInt(25));
-            memo.setAuralScore(cursor.getInt(26));
-            memo.setAverageScore(cursor.getFloat(27));
-            memo.setShortComment(cursor.getString(28));
+            memo.setAddTime(cursor.getLong(18));
+            memo.setViewingDate(cursor.getLong(19));
+            memo.setViewingWay(cursor.getString(20));
+            memo.setViewingVersion1(cursor.getString(21));
+            memo.setViewingVersion2(cursor.getString(22));
+            memo.setMovieVersion(cursor.getString(23));
+            memo.setViewingMood(cursor.getString(24));
+            memo.setStoryScore(cursor.getInt(25));
+            memo.setVisualScore(cursor.getInt(26));
+            memo.setAuralScore(cursor.getInt(27));
+            memo.setAverageScore(cursor.getFloat(28));
+            memo.setShortComment(cursor.getString(29));
         }
         db.close();
         callback.onMemoLoaded(memo);
@@ -227,10 +225,10 @@ public class LocalMemoModel implements MemoModel {
                                                          String orderBy, String orderWay) {
         List<SimpleMovieMemo> memos = new ArrayList<SimpleMovieMemo>();
         SQLiteDatabase db = helper.getReadableDatabase();
-        String selectSimpleMemoSqlPrefix = "select m.id, m.title, m.original_title, m.image_small, m.image_medium," +
-                "m.image_large, m.douban_score, m.year, m.subtype, m.directors, m.casts,  m.countries, m.genres," +
-                "mm.moviememo_id, mm.viewing_date, mm.viewing_way, mm.viewing_version1, mm.viewing_version2, " +
-                "mm.movie_version, mm.average_score, mm.short_comment, mm.add_time " +
+        String selectSimpleMemoSqlPrefix = "select m.id, m.title, m.original_title, m.pinyin_title, m.image_small, " +
+                "m.image_medium, m.image_large, m.douban_score, m.year, m.subtype, m.directors, m.casts, " +
+                "m.countries, m.genres, mm.moviememo_id, mm.viewing_date, mm.viewing_way, mm.viewing_version1, " +
+                "mm.viewing_version2, mm.movie_version, mm.average_score, mm.short_comment, mm.add_time " +
                 "from movie m, moviememo mm where m.id = mm.douban_movie_id and mm.is_available = 1 ";
         StringBuilder sb = new StringBuilder(selectSimpleMemoSqlPrefix);
         if (simpleMovieMemo != null) {
@@ -261,30 +259,31 @@ public class LocalMemoModel implements MemoModel {
             simpleMemo.setMovieId(cursor.getString(0));
             simpleMemo.setTitle(cursor.getString(1));
             simpleMemo.setOriginal_title(cursor.getString(2));
+            simpleMemo.setPinyin_title(cursor.getString(3));
             SimpleMovieMemo.Images images = simpleMemo.new Images();
-            images.setSmall(cursor.getString(3));
-            images.setMedium(cursor.getString(4));
-            images.setLarge(cursor.getString(5));
+            images.setSmall(cursor.getString(4));
+            images.setMedium(cursor.getString(5));
+            images.setLarge(cursor.getString(6));
             simpleMemo.setImages(images);
             SimpleMovieMemo.Rating rating = simpleMemo.new Rating();
-            rating.setAverage(cursor.getFloat(6));
+            rating.setAverage(cursor.getFloat(7));
             simpleMemo.setRating(rating);
-            simpleMemo.setYear(cursor.getString(7));
-            simpleMemo.setSubtype(cursor.getString(8));
-            simpleMemo.setDirectors(cursor.getString(9));
-            simpleMemo.setCasts(cursor.getString(10));
-            simpleMemo.setCountries(cursor.getString(11));
-            simpleMemo.setGenres(cursor.getString(12));
-            simpleMemo.setMemoId(cursor.getString(13));
-            Date viewingDate = new Date(cursor.getLong(14));
+            simpleMemo.setYear(cursor.getString(8));
+            simpleMemo.setSubtype(cursor.getString(9));
+            simpleMemo.setDirectors(cursor.getString(10));
+            simpleMemo.setCasts(cursor.getString(11));
+            simpleMemo.setCountries(cursor.getString(12));
+            simpleMemo.setGenres(cursor.getString(13));
+            simpleMemo.setMemoId(cursor.getString(14));
+            Date viewingDate = new Date(cursor.getLong(15));
             simpleMemo.setViewingDate(viewingDate);
-            simpleMemo.setViewingWay(cursor.getString(15));
-            simpleMemo.setViewingVersion1(cursor.getString(16));
-            simpleMemo.setViewingVersion2(cursor.getString(17));
-            simpleMemo.setMovieVersion(cursor.getString(18));
-            simpleMemo.setAverageScore(cursor.getFloat(19));
-            simpleMemo.setShortComment(cursor.getString(20));
-            Date addTime = new Date(cursor.getLong(21));
+            simpleMemo.setViewingWay(cursor.getString(16));
+            simpleMemo.setViewingVersion1(cursor.getString(17));
+            simpleMemo.setViewingVersion2(cursor.getString(18));
+            simpleMemo.setMovieVersion(cursor.getString(19));
+            simpleMemo.setAverageScore(cursor.getFloat(20));
+            simpleMemo.setShortComment(cursor.getString(21));
+            Date addTime = new Date(cursor.getLong(22));
             simpleMemo.setAddTime(addTime);
             memos.add(simpleMemo);
         }

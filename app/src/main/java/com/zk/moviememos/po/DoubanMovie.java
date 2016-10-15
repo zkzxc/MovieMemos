@@ -18,6 +18,7 @@ public class DoubanMovie extends BaseObservable {
     private String id;
     private String title;
     private String original_title;
+    private String pinyin_title;
     private List<String> aka;
     private String mobile_url;
     private DoubanMovieScore rating;
@@ -123,6 +124,14 @@ public class DoubanMovie extends BaseObservable {
 
     public void setOriginal_title(String original_title) {
         this.original_title = original_title;
+    }
+
+    public String getPinyin_title() {
+        return this.pinyin_title;
+    }
+
+    public void setPinyin_title(String pinyin_title) {
+        this.pinyin_title = pinyin_title;
     }
 
     public String getAka() {
