@@ -1,5 +1,8 @@
 package com.zk.moviememos.model;
 
+import android.content.ContentValues;
+import android.database.SQLException;
+import android.database.sqlite.SQLiteDatabase;
 import android.widget.Toast;
 
 import com.zk.moviememos.App;
@@ -24,11 +27,13 @@ import retrofit2.http.Query;
 public class DoubanMovieModel implements MovieModel {
 
     private static DoubanMovieModel mModel;
+    private static MovieMemoSQLiteOpenHelper helper;
 
     private DoubanMovieModel() {
     }
 
     public static DoubanMovieModel getInstance() {
+        helper = MovieMemoSQLiteOpenHelper.getInstance(App.getContext());
         if (mModel == null) {
             mModel = new DoubanMovieModel();
         }
@@ -38,6 +43,15 @@ public class DoubanMovieModel implements MovieModel {
     Retrofit retrofit = new Retrofit.Builder().baseUrl(DefaultConfigs.DOUBAN_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create()).build();
     IDoubanMovieBiz doubanMovieBiz = retrofit.create(IDoubanMovieBiz.class);
+
+    private interface IDoubanMovieBiz {
+
+        @GET("search")
+        Call<DoubanSearchObject> getMoviesByKeyword(@Query("q") String keyword);
+
+        @GET("subject/{id}")
+        Call<DoubanMovie> getMovieById(@Path("id") String id);
+    }
 
     @Override
     public void getMovies(String keyword, int start, final GetMoviesCallBack callBack) {
@@ -83,13 +97,68 @@ public class DoubanMovieModel implements MovieModel {
         });
     }
 
-
-    private interface IDoubanMovieBiz {
-
-        @GET("search")
-        Call<DoubanSearchObject> getMoviesByKeyword(@Query("q") String keyword);
-
-        @GET("subject/{id}")
-        Call<DoubanMovie> getMovieById(@Path("id") String id);
+    @Override
+    public void updateMovie(DoubanMovie movie) {
+        SQLiteDatabase db = helper.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues();
+            if (movie.getTitle() != null) {
+                values.put("title", movie.getTitle());
+            }
+            if (movie.getOriginal_title() != null) {
+                values.put("original_title", movie.getOriginal_title());
+            }
+            if (movie.getAka() != null) {
+                values.put("aka", movie.getAka());
+            }
+            if (movie.getRating() != null) {
+                values.put("douban_score", movie.getRating().getAverage());
+            }
+            if (movie.getImages().getLarge() != null) {
+                values.put("image_large", movie.getImages().getLarge());
+            }
+            if (movie.getImages().getMedium() != null) {
+                values.put("image_medium", movie.getImages().getMedium());
+            }
+            if (movie.getImages().getSmall() != null) {
+                values.put("image_small", movie.getImages().getSmall());
+            }
+            if (movie.getSubtype() != null) {
+                values.put("subtype", movie.getSubtype());
+            }
+            if (movie.getDirectorsNames() != null) {
+                values.put("directors", movie.getDirectorsNames());
+            }
+            if (movie.getCastsNames() != null) {
+                values.put("casts", movie.getCastsNames());
+            }
+            if (movie.getYear() != null) {
+                values.put("year", movie.getYear());
+            }
+            if (movie.getGenres() != null) {
+                values.put("genres", movie.getGenres());
+            }
+            if (movie.getCountries() != null) {
+                values.put("countries", movie.getCountries());
+            }
+            if (movie.getSummary() != null) {
+                values.put("summary", movie.getSummary());
+            }
+            if (movie.getSeasons_count() != null) {
+                values.put("seasons_count", movie.getSeasons_count());
+            }
+            if (movie.getEpisodes_count() != null) {
+                values.put("episodes_count", movie.getEpisodes_count());
+            }
+            db.update("movie", values, "id = ?", new String[]{movie.getId()});
+            db.setTransactionSuccessful();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
     }
+
 }

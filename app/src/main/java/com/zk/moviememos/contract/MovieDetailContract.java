@@ -21,5 +21,6 @@ public interface MovieDetailContract {
 
     interface Presenter extends BasePresenter {
 
+        void getMemosByMovieId(String movieId);
     }
 }

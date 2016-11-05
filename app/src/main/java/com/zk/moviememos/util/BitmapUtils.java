@@ -1,10 +1,17 @@
 package com.zk.moviememos.util;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.ColorMatrix;
 import android.graphics.ColorMatrixColorFilter;
 import android.graphics.Paint;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class BitmapUtils {
 
@@ -312,5 +319,26 @@ public class BitmapUtils {
         bitmap.setPixels(pix, 0, w, 0, 0, w, h);
 
         return (bitmap);
+    }
+
+    /**
+     * 保存Bitmap到缓存目录
+     * @param context
+     * @param bitmap
+     * @param name
+     */
+    public static void saveBitmapToCacheDir(Context context, Bitmap bitmap, String name) {
+        try {
+            File file = new File(context.getCacheDir(), name);
+            if (file.exists()) {
+                file.delete();
+            }
+            FileOutputStream fos = context.openFileOutput(name, MODE_PRIVATE);
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

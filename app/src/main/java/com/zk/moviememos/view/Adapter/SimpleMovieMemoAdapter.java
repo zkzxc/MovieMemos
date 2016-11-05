@@ -26,6 +26,7 @@ import java.util.List;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
+ * 现在用的是PinnedSctionListView，所以这个类暂时没用
  */
 public class SimpleMovieMemoAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> implements
         StickyRecyclerHeadersAdapter {

@@ -38,7 +38,25 @@ public class BaseFragment<T> extends Fragment implements BaseView<T> {
             }
             fragmentTransaction.commit();
         }
-        ((BasePresenter)mPresenter).init();
+        ((BasePresenter) mPresenter).initOnCreate();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        ((BasePresenter) mPresenter).loadOnResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        mPresenter = null;
+        super.onDestroy();
+    }
+
+    @Override
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+        ((BasePresenter) mPresenter).loadOnHiddenChanged(hidden);
     }
 
     @Override
@@ -58,6 +76,7 @@ public class BaseFragment<T> extends Fragment implements BaseView<T> {
 
     /**
      * Fragment是否可用
+     *
      * @return true为可用，false为没有添加进Activity或正在被移除
      */
     @Override

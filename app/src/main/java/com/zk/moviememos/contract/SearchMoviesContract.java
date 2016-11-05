@@ -21,7 +21,7 @@ public interface SearchMoviesContract {
 
         void hideResults();
 
-        void showItem(String todo, String movieId, String title, boolean isTv,  String posterUrl, ImageView imageView,
+        void showItem(String action, String movieId, String title, boolean isTv,  String posterUrl, ImageView imageView,
                       String transitionName);
 
         void showNoResult();

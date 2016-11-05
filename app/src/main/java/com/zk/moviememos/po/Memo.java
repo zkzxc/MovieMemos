@@ -12,7 +12,9 @@ import java.util.Date;
 /**
  * Created by zk <zkzxc1988@163.com>.
  */
-public class Memo {
+public class Memo implements Cloneable {
+
+    public static final String NO_SHORT_COMMENT = ResourseUtils.getString(R.string.no_short_comment);
 
     private String movieMemoId;
     private DoubanMovie doubanMovie;
@@ -40,6 +42,7 @@ public class Memo {
     private String visualScoreStr;
     private String auralScoreStr;
     private String averageScoreStr;
+    private Calendar calendar = Calendar.getInstance();
 
     public String getMovieMemoId() {
         return movieMemoId;
@@ -95,6 +98,7 @@ public class Memo {
 
     public void setViewingDate(Long viewingDate) {
         this.viewingDate = viewingDate;
+        this.calendar.setTime(new Date(viewingDate));
     }
 
     public String getShortComment() {
@@ -162,8 +166,6 @@ public class Memo {
     }
 
     public String getViewingDateStr() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(new Date(viewingDate));
         StringBuilder sb = new StringBuilder();
         sb.append(calendar.get(Calendar.YEAR))
                 .append(ResourseUtils.getString(R.string.year))
@@ -273,5 +275,47 @@ public class Memo {
 
     public String getAverageScoreStr() {
         return String.valueOf(averageScore);
+    }
+
+    @Override
+    public String toString() {
+        return "Memo{" +
+                "movieMemoId='" + movieMemoId + '\'' +
+                ", doubanMovie=" + doubanMovie +
+                ", viewingDate=" + viewingDate +
+                ", viewingWay='" + viewingWay + '\'' +
+                ", viewingVersion1='" + viewingVersion1 + '\'' +
+                ", viewingVersion2='" + viewingVersion2 + '\'' +
+                ", movieVersion='" + movieVersion + '\'' +
+                ", viewingMood='" + viewingMood + '\'' +
+                ", storyScore=" + storyScore +
+                ", visualScore=" + visualScore +
+                ", auralScore=" + auralScore +
+                ", averageScore=" + averageScore +
+                ", shortComment='" + shortComment + '\'' +
+                ", isAvailable='" + isAvailable + '\'' +
+                ", addTime=" + addTime +
+                ", viewingDateStr='" + viewingDateStr + '\'' +
+                ", viewingWayStr='" + viewingWayStr + '\'' +
+                ", viewingVersion1Str='" + viewingVersion1Str + '\'' +
+                ", viewingVersion2Str='" + viewingVersion2Str + '\'' +
+                ", movieVersionStr='" + movieVersionStr + '\'' +
+                ", viewingMoodStr='" + viewingMoodStr + '\'' +
+                ", storyScoreStr='" + storyScoreStr + '\'' +
+                ", visualScoreStr='" + visualScoreStr + '\'' +
+                ", auralScoreStr='" + auralScoreStr + '\'' +
+                ", averageScoreStr='" + averageScoreStr + '\'' +
+                '}';
+    }
+
+    @Override
+    public Object clone(){
+        Object o = null;
+        try {
+            o = super.clone();
+        } catch (CloneNotSupportedException e) {
+            e.printStackTrace();
+        }
+        return  o;
     }
 }

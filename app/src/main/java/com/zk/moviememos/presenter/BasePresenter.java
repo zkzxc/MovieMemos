@@ -5,6 +5,10 @@ package com.zk.moviememos.presenter;
  */
 public interface BasePresenter {
 
-    void init();
+    void initOnCreate();
+
+    void loadOnResume();
+
+    void loadOnHiddenChanged(boolean hidden);
 
 }

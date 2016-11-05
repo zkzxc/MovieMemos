@@ -11,21 +11,12 @@ import com.zk.moviememos.contract.TagContract;
 /**
  * Created by zk <zkzxc1988@163.com>.
  */
-public class TagFragment extends BaseFragment<TagContract.Presenter> {
+public class TagFragment extends BaseFragment<TagContract.Presenter> implements TagContract.View{
 
     public static final String TAG = "TagFragment";
 
-    private static TagFragment mFragment;
-
-    public TagFragment(){
-        this.mFragment = this;
-    }
-
     public static TagFragment getInstance() {
-        if (mFragment == null) {
-            mFragment = new TagFragment();
-        }
-        return mFragment;
+        return new TagFragment();
     }
 
     @Override

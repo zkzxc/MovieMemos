@@ -3,14 +3,12 @@ package com.zk.moviememos.view.fragment;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.design.widget.AppBarLayout;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -43,8 +41,6 @@ public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Pres
 
     public static final String ARGUMENT = "argument";
 
-    private static SearchMoviesFragment mFragment;
-
     private boolean needSearchViewExpand;
     private SearchView mSearchView;
     private RecyclerView rvResults;
@@ -52,19 +48,12 @@ public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Pres
     private LinearLayout llNoResult;
     private SimpleDoubanMovieAdapter mAdapter;
 
-    public SearchMoviesFragment() {
-        this.mFragment = this;
-    }
-
     public static SearchMoviesFragment getInstance(boolean needSearchViewExpand) {
         Bundle bundle = new Bundle();
         bundle.putBoolean(ARGUMENT, needSearchViewExpand);
-        SearchMoviesFragment searchMoviesFragment = null;
-        if (mFragment == null) {
-            mFragment = new SearchMoviesFragment();
-        }
-        mFragment.setArguments(bundle);
-        return mFragment;
+        SearchMoviesFragment searchMoviesFragment = new SearchMoviesFragment();
+        searchMoviesFragment.setArguments(bundle);
+        return searchMoviesFragment;
     }
 
     @Override
@@ -134,14 +123,14 @@ public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Pres
     }
 
     @Override
-    public void showItem(String todo, String movieId, String title, boolean isTv, String posterUrl, ImageView
+    public void showItem(String action, String movieId, String title, boolean isTv, String posterUrl, ImageView
             imageView, String transitionName) {
         Bundle bundle = new Bundle();
         bundle.putString("movieId", movieId);
         bundle.putString("title", title);
         bundle.putBoolean("isTv", isTv);
         bundle.putString("posterUrl", posterUrl);
-        bundle.putString("todo", todo);
+        bundle.putString("action", action);
         Intent intent = new Intent(mActivity, MovieActivity.class);
         intent.putExtras(bundle);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

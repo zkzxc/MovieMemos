@@ -43,6 +43,7 @@ public class LocalMemoModel implements MemoModel {
 
     @Override
     public void saveMemo(DoubanMovie movie, Memo memo) {
+        LogUtils.d(this, memo.toString());
         SQLiteDatabase db = helper.getWritableDatabase();
         db.beginTransaction();
         Cursor cursor = null;
@@ -64,23 +65,36 @@ public class LocalMemoModel implements MemoModel {
                         movie.getCountries(), movie.getSummary(), movie.getSeasons_count(), movie.getEpisodes_count(),
                         BusinessConstans.VIEWING_FLAG_SEEN});
             }
-            // 查询在memo表中是否存在未删除的该memo，存在则修改该memo，不存在则插入一条memo
-            cursor = db.rawQuery("select moviememo_id from moviememo where moviememo_id = ?",
-                    new String[]{memo.getMovieMemoId()});
-            if (cursor.moveToNext()) {
-                ContentValues values = new ContentValues();
-                values.put("viewing_date", memo.getViewingDate());
-                values.put("viewing_way", memo.getViewingWay());
-                values.put("viewing_version1", memo.getViewingVersion1());
-                values.put("viewing_version2", memo.getViewingVersion2());
-                values.put("movie_version", memo.getMovieVersion());
-                values.put("viewing_mood", memo.getViewingMood());
-                values.put("story_score", memo.getStoryScore());
-                values.put("visual_score", memo.getVisualScore());
-                values.put("aural_score", memo.getAuralScore());
-                values.put("average_score", memo.getAverageScore());
-                values.put("short_comment", memo.getShortComment());
-                db.update("moviememo", values, "moviememo_id = ?", new String[]{memo.getMovieMemoId()});
+            if (memo.getMovieMemoId() != null) {
+                // 查询在memo表中是否存在未删除的该memo，存在则修改该memo，不存在则插入一条memo
+                cursor = db.rawQuery("select moviememo_id from moviememo where moviememo_id = ?",
+                        new String[]{memo.getMovieMemoId()});
+                if (cursor.moveToNext()) {
+                    ContentValues values = new ContentValues();
+                    values.put("viewing_date", memo.getViewingDate());
+                    values.put("viewing_way", memo.getViewingWay());
+                    values.put("viewing_version1", memo.getViewingVersion1());
+                    values.put("viewing_version2", memo.getViewingVersion2());
+                    values.put("movie_version", memo.getMovieVersion());
+                    values.put("viewing_mood", memo.getViewingMood());
+                    values.put("story_score", memo.getStoryScore());
+                    values.put("visual_score", memo.getVisualScore());
+                    values.put("aural_score", memo.getAuralScore());
+                    values.put("average_score", memo.getAverageScore());
+                    values.put("short_comment", memo.getShortComment());
+                    db.update("moviememo", values, "moviememo_id = ?", new String[]{memo.getMovieMemoId()});
+                } else {
+                    db.execSQL("insert into moviememo (douban_movie_id, add_time, viewing_date, viewing_way," +
+                                    "viewing_version1, viewing_version2, movie_version, viewing_mood, story_score, " +
+                                    "visual_score, aural_score, average_score, short_comment, is_available) " +
+                                    "values(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                            new Object[]{movie.getId(), memo.getAddTime(), memo.getViewingDate(), memo.getViewingWay(),
+                                    memo.getViewingVersion1(), memo.getViewingVersion2(), memo.getMovieVersion(),
+                                    memo.getViewingMood(), memo.getStoryScore(), memo.getVisualScore(),
+                                    memo.getAuralScore(), memo.getAverageScore(), memo.getShortComment(),
+                                    BusinessConstans.IS_AVAILABLE_YES
+                            });
+                }
             } else {
                 db.execSQL("insert into moviememo (douban_movie_id, add_time, viewing_date, viewing_way," +
                                 "viewing_version1, viewing_version2, movie_version, viewing_mood, story_score, " +
@@ -135,6 +149,7 @@ public class LocalMemoModel implements MemoModel {
         Cursor cursor = db.rawQuery(sql, null);
         while (cursor.moveToNext()) {
             memo = new Memo();
+            memo.setMovieMemoId(memoId);
             DoubanMovie movie = new DoubanMovie();
             movie.setId(cursor.getString(0));
             movie.setTitle(cursor.getString(1));
@@ -190,14 +205,19 @@ public class LocalMemoModel implements MemoModel {
         SQLiteDatabase db = helper.getWritableDatabase();
         db.beginTransaction();
         Cursor cursor = null;
-        // 先更新memo表中的记录，再删除movie表中的记录
+        // 先更新memo表中的记录，再查询是否还有该movie的已看记录，如果没有则删除movie表中（标记为已看）的记录
         try {
             db.execSQL("update moviememo set is_available = ? where moviememo_id = ?", new String[]{
                     BusinessConstans.IS_AVAILABLE_NO, memoId});
             cursor = db.rawQuery("select douban_movie_id from moviememo where moviememo_id = " + memoId, null);
             if (cursor.moveToNext()) {
                 String movieId = cursor.getString(0);
-                db.execSQL("delete from movie where id = " + movieId);
+                cursor = db.rawQuery("select moviememo_id from moviememo where douban_movie_id = (" +
+                        "select douban_movie_id from moviememo where moviememo_id = " + memoId +
+                        " ) and is_available = " + BusinessConstans.IS_AVAILABLE_YES, null);
+                if (!cursor.moveToNext()) {
+                    db.execSQL("delete from movie where id = " + movieId);
+                }
             } else {
                 throw new RuntimeException("movie表中没有该movieId");
             }

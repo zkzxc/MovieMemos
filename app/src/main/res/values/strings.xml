@@ -68,7 +68,7 @@
     <string name="aural">听觉</string>
     <string name="save_success">保存成功</string>
     <string name="save_failure">保存失败</string>
-    <string name="no_short_comment">没有短评</string>
+    <string name="no_short_comment">暂无短评</string>
     <string name="movie_memo">观影记录</string>
     <string name="tiao">条</string>
     <string name="rating">评分</string>
@@ -82,4 +82,11 @@
     <string name="delete_memo_message">要删除该观影记录吗？</string>
     <string name="delete">删除</string>
     <string name="delete_success">删除成功</string>
+    <string name="welcome_title">欢迎使用电影手账</string>
+    <string name="welcome_detail_item_search_movie">查询影视作品信息</string>
+    <string name="welcome_detail_item_record_want">备忘你想看的影视作品</string>
+    <string name="welcome_detail_item_record_seen">记录、评价你曾经看过的影视作品</string>
+    <string name="welcome_hint">点击右下的“ + ”号搜索查看想要的影视作品信息，然后添加到记录中</string>
+    <string name="exit_by_2_click_hint">再按一次退出程序</string>
+    <string name="have_loaded_all">已加载全部</string>
 </resources>

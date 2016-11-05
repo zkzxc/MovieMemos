@@ -14,6 +14,7 @@ public interface MovieModel {
 
     void getMovieById(String id, GetMovieCallBack callBack);
 
+    void updateMovie(DoubanMovie doubanMovie);
 
     interface GetMoviesCallBack {
 

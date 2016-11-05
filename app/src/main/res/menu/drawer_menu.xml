@@ -27,11 +27,11 @@
                     android:id="@+id/nav_item_settings"
                     android:icon="@drawable/ic_settings"
                     android:title="@string/drawer_menu_item_title_settings" />
-                <item
-                    android:id="@+id/nav_item_nightmode"
-                    android:checkable="true"
-                    android:icon="@drawable/ic_night"
-                    android:title="@string/drawer_menu_item_title_nightmode" />
+                <!--<item-->
+                    <!--android:id="@+id/nav_item_nightmode"-->
+                    <!--android:checkable="true"-->
+                    <!--android:icon="@drawable/ic_night"-->
+                    <!--android:title="@string/drawer_menu_item_title_nightmode" />-->
             </group>
         </menu>
     </item>

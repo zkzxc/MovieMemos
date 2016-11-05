@@ -5,15 +5,17 @@ import android.databinding.DataBindingUtil;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.ActivityOptionsCompat;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.AdapterView;
 
 import com.zk.moviememos.R;
+import com.zk.moviememos.constants.BusinessConstans;
 import com.zk.moviememos.contract.SeenMemosContract;
 import com.zk.moviememos.databinding.SimpleMovieMemoItemBinding;
+import com.zk.moviememos.util.LogUtils;
 import com.zk.moviememos.util.ResourseUtils;
 import com.zk.moviememos.view.Adapter.SimpleMovieMemoListViewAdapter;
 import com.zk.moviememos.view.activity.MainActivity;
@@ -30,31 +32,25 @@ import java.util.List;
 public class SeenMemosFragment extends BaseFragment<SeenMemosContract.Presenter> implements SeenMemosContract.View {
 
     public static final String TAG = "SeenMemosFragment";
-    public static final String SHOW_MEMO = "show_memo";
 
-    private static SeenMemosFragment mFragment;
-
+    private View mRoot;
     private View mNoMemoView;
-    private RecyclerView mRecycleView;
+    //private RecyclerView mRecycleView;
+    PinnedSectionListView listView;
     private SimpleMovieMemoListViewAdapter mAdapter;
-
-    public SeenMemosFragment() {
-        this.mFragment = this;
-    }
+    private int page;
+    private boolean loadedAll;
+    private View footer;
 
     public static SeenMemosFragment getInstance() {
-        if (mFragment == null) {
-            mFragment = new SeenMemosFragment();
-        }
-        return mFragment;
+        return new SeenMemosFragment();
     }
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle
             savedInstanceState) {
-        View root = inflater.inflate(R.layout.fragment_seen, container, false);
-
+        mRoot = inflater.inflate(R.layout.fragment_seen, container, false);
 //        mRecycleView = (RecyclerView) root.findViewById(R.id.rv_memoList);
 //        mRecycleView.setLayoutManager(new LinearLayoutManager(mActivity));
 //        mRecycleView.setItemAnimator(new DefaultItemAnimator());
@@ -69,13 +65,13 @@ public class SeenMemosFragment extends BaseFragment<SeenMemosContract.Presenter>
 //            }
 //        });
 
-        PinnedSectionListView lv = (PinnedSectionListView) root.findViewById(R.id.lv_memoList);
+        listView = (PinnedSectionListView) mRoot.findViewById(R.id.lv_memoList);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            lv.setNestedScrollingEnabled(true);
+            listView.setNestedScrollingEnabled(true);
         }
         mAdapter = new SimpleMovieMemoListViewAdapter(mActivity, new ArrayList<SimpleMovieMemo>());
-        lv.setAdapter(mAdapter);
-        lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 SimpleMovieMemoItemBinding binding = DataBindingUtil.findBinding(view);
@@ -87,7 +83,7 @@ public class SeenMemosFragment extends BaseFragment<SeenMemosContract.Presenter>
                     bundle.putString("title", memo.getTitle());
                     bundle.putBoolean("isTv", memo.isTv());
                     bundle.putString("posterUrl", memo.getImages().getLarge());
-                    bundle.putString("todo", SHOW_MEMO);
+                    bundle.putString("action", BusinessConstans.MOVIE_ACTIVITY_ACTION_SHOW_MEMO);
                     Intent intent = new Intent(mActivity, MovieActivity.class);
                     intent.putExtras(bundle);
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -100,30 +96,68 @@ public class SeenMemosFragment extends BaseFragment<SeenMemosContract.Presenter>
                 }
             }
         });
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
 
-        mNoMemoView = root.findViewById(R.id.ll_noMemo);
-        return root;
+            int lastVisiblePosition = -1;
+
+            @Override
+            public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+            }
+
+            @Override
+            public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                LogUtils.d(this, "firstVisibleItem:    " + firstVisibleItem + "    visibleItemCount:    " +
+                        visibleItemCount + "    totalItemCount:    " + totalItemCount);
+                LogUtils.d(this, "getFirstVisiblePosition:    " + listView.getFirstVisiblePosition() +
+                        "    getLastVisiblePosition:    " + listView.getLastVisiblePosition());
+                if (lastVisiblePosition != listView.getLastVisiblePosition()) {
+                    lastVisiblePosition = listView.getLastVisiblePosition();
+                    if (lastVisiblePosition == totalItemCount - 1 && !loadedAll) {
+                        page++;
+                        mPresenter.loadMemos(BusinessConstans.PAGE_SIZE_SEEN_MEMOS * page);
+                    }
+                }
+            }
+        });
+
+        mNoMemoView = mRoot.findViewById(R.id.cv_welcome);
+        return mRoot;
     }
 
     @Override
     public void showNoMemo() {
-        if (isActive() && mRecycleView != null && mNoMemoView != null) {
-            mRecycleView.setVisibility(View.GONE);
+        if (isActive() && listView != null && mNoMemoView != null) {
+            listView.setVisibility(View.GONE);
             mNoMemoView.setVisibility(View.VISIBLE);
         }
     }
 
     @Override
     public void showSeenMemos(List<SimpleMovieMemo> memos) {
-        if (memos != null && memos.size() > 0) {
+        LogUtils.d(this, "page: ............................  " + page);
+        if (page == 0) {
             mAdapter.setList(memos);
+        } else {
+            mAdapter.addToList(memos);
         }
     }
 
+    @Override
     public void hideNoMemo() {
-        if (isActive() && mRecycleView != null && mNoMemoView != null) {
-            mRecycleView.setVisibility(View.VISIBLE);
+        if (isActive() && listView != null && mNoMemoView != null) {
+            listView.setVisibility(View.VISIBLE);
             mNoMemoView.setVisibility(View.GONE);
+        }
+    }
+
+    @Override
+    public void addFooter() {
+        loadedAll = true;
+        page--;
+        if (listView.getFooterViewsCount() == 0) {
+            footer = View.inflate(mActivity, R.layout.footer_have_loaded_all, null);
+            listView.addFooterView(footer);
         }
     }
 
@@ -140,4 +174,14 @@ public class SeenMemosFragment extends BaseFragment<SeenMemosContract.Presenter>
             ((MainActivity) mActivity).hideProgress();
         }
     }
+
+    @Override
+    public void clear() {
+        page = 0;
+        loadedAll = false;
+        mAdapter.setList(null);
+        listView.removeFooterView(footer);
+        listView.scrollTo(0, 0);
+    }
+
 }

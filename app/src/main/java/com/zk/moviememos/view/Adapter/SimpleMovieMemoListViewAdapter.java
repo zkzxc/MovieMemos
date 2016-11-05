@@ -21,6 +21,7 @@ import com.zk.moviememos.util.LogUtils;
 import com.zk.moviememos.vo.SimpleMovieMemo;
 import com.zk.moviememos.widget.PinnedSectionListView;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,6 +46,11 @@ public class SimpleMovieMemoListViewAdapter extends BaseAdapter implements
         } else {
             memos = new ArrayList<>();
         }
+        notifyDataSetChanged();
+    }
+
+    public void addToList(List<SimpleMovieMemo> memos) {
+        this.memos.addAll(memos);
         notifyDataSetChanged();
     }
 
@@ -80,7 +86,7 @@ public class SimpleMovieMemoListViewAdapter extends BaseAdapter implements
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        SimpleMovieMemo memo = getItem(position);
+        final SimpleMovieMemo memo = getItem(position);
         SectionViewHolder sectionViewHolder = null;
         SimpleMovieMemoItemBinding binding = null;
         int type = getItemViewType(position);
@@ -115,17 +121,39 @@ public class SimpleMovieMemoListViewAdapter extends BaseAdapter implements
             binding.setSimpleMovieMemo(memo);
             binding.executePendingBindings();
 
-            LogUtils.d(this, "image:    " + memo.getImages().getLarge());
             final SimpleMovieMemoItemBinding finalBinding = binding;
-            Glide.with(context).load(memo.getImages().getLarge()).asBitmap().into(new SimpleTarget<Bitmap>(100, 150) {
-                @Override
-                public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
-                    finalBinding.ivMovieImageLarge.setImageBitmap(resource);
-                    Bitmap blurredPoster = BitmapUtils.doBlur(resource, 40, false);
-                    blurredPoster = BitmapUtils.setBrightness(blurredPoster, -40);
-                    finalBinding.ivTitleBg.setImageBitmap(blurredPoster);
-                }
-            });
+
+            final File posterFile = new File(context.getFilesDir(), memo.getMovieId() + ".jpg");
+            final File blurredPosterFile = new File(context.getFilesDir(), "B" + memo.getMovieId() + ".jpg");
+            if (posterFile.exists() && blurredPosterFile.exists()) {
+                Glide.with(context).load(posterFile).asBitmap().into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        LogUtils.d(this, "从缓存读取图片：   " + posterFile.getPath());
+                        finalBinding.ivMovieImageLarge.setImageBitmap(resource);
+                    }
+                });
+                Glide.with(context).load(blurredPosterFile).asBitmap().into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        LogUtils.d(this, "从缓存读取图片：   " + blurredPosterFile.getPath());
+                        finalBinding.ivTitleBg.setImageBitmap(resource);
+                    }
+                });
+            } else {
+                Glide.with(context).load(memo.getImages().getLarge()).asBitmap().into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        LogUtils.d(this, "image:    " + memo.getImages().getLarge());
+                        finalBinding.ivMovieImageLarge.setImageBitmap(resource);
+                        Bitmap blurredPoster = BitmapUtils.doBlur(resource, 40, false);
+                        blurredPoster = BitmapUtils.setBrightness(blurredPoster, -40);
+                        finalBinding.ivTitleBg.setImageBitmap(blurredPoster);
+                        BitmapUtils.saveBitmapToCacheDir(context, resource, memo.getMovieId() + ".jpg");
+                        BitmapUtils.saveBitmapToCacheDir(context, blurredPoster, "B" + memo.getMovieId() + ".jpg");
+                    }
+                });
+            }
 
             // 动态设置title的宽度，以适应不同屏幕的手机
             int windowWidth = DisplayUtils.getWindowWidth(App.getContext());
@@ -147,6 +175,7 @@ public class SimpleMovieMemoListViewAdapter extends BaseAdapter implements
     }
 
     class SectionViewHolder {
+
         public TextView sectionTextLeft;
         public TextView sectionTextRight;
     }

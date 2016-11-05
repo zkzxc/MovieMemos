@@ -29,12 +29,6 @@ public class AddEditMemoPresenter implements AddEditMemoContract.Presenter {
         mView.setPresenter(this);
     }
 
-    @Override
-    public void init() {
-        if (memoId != null) {
-            getMemo(memoId);
-        }
-    }
 
     @Override
     public void saveMemo(DoubanMovie movie, Memo memo) {
@@ -57,5 +51,20 @@ public class AddEditMemoPresenter implements AddEditMemoContract.Presenter {
 
             }
         });
+    }
+
+    @Override
+    public void initOnCreate() {
+
+    }
+
+    @Override
+    public void loadOnResume() {
+
+    }
+
+    @Override
+    public void loadOnHiddenChanged(boolean hidden) {
+
     }
 }

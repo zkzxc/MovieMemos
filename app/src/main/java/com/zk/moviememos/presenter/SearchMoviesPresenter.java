@@ -20,13 +20,8 @@ public class SearchMoviesPresenter implements SearchMoviesContract.Presenter, Si
     private DoubanMovieModel mModel;
     private SearchMoviesContract.View mView;
 
-    private static SearchMoviesPresenter mPresenter;
-
     public static SearchMoviesPresenter getInstance(DoubanMovieModel model, SearchMoviesContract.View view) {
-        if (mPresenter == null) {
-            mPresenter = new SearchMoviesPresenter(model, view);
-        }
-        return mPresenter;
+        return new SearchMoviesPresenter(model, view);
     }
 
     private SearchMoviesPresenter(DoubanMovieModel model, SearchMoviesContract.View view) {
@@ -36,7 +31,17 @@ public class SearchMoviesPresenter implements SearchMoviesContract.Presenter, Si
     }
 
     @Override
-    public void init() {
+    public void initOnCreate() {
+
+    }
+
+    @Override
+    public void loadOnResume() {
+
+    }
+
+    @Override
+    public void loadOnHiddenChanged(boolean hidden) {
 
     }
 
@@ -80,8 +85,8 @@ public class SearchMoviesPresenter implements SearchMoviesContract.Presenter, Si
     }
 
     @Override
-    public void onItemclick(String todo, String movieId, String title, boolean isTv, String posterUrl, ImageView
+    public void onItemclick(String action, String movieId, String title, boolean isTv, String posterUrl, ImageView
             imageView, String transitionName) {
-        mView.showItem(todo, movieId, title, isTv, posterUrl, imageView, transitionName);
+        mView.showItem(action, movieId, title, isTv, posterUrl, imageView, transitionName);
     }
 }

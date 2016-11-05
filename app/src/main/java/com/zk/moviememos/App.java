@@ -11,6 +11,9 @@ public class App extends Application {
 
     private static App mContext;
 
+    public static boolean updateSeenMemo;
+    public static boolean updateWantMemo;
+
     @Override
     public void onCreate() {
         super.onCreate();

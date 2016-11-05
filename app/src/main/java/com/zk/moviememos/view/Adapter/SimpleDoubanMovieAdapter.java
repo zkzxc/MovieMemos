@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.zk.moviememos.App;
 import com.zk.moviememos.R;
+import com.zk.moviememos.constants.BusinessConstans;
 import com.zk.moviememos.databinding.SimpleDoubanMovieItemBinding;
 import com.zk.moviememos.util.DisplayUtils;
 import com.zk.moviememos.util.LogUtils;
@@ -26,9 +27,6 @@ import java.util.List;
  * Created by zk <zkzxc1988@163.com>.
  */
 public class SimpleDoubanMovieAdapter extends RecyclerView.Adapter<SimpleDoubanMovieAdapter.BindingHolder> {
-
-    public static final String SHOW_MOVIE_DETAIL = "show_movie_detail";
-    public static final String ADD_MEMO = "add_memo";
 
     private Context context;
 
@@ -57,7 +55,7 @@ public class SimpleDoubanMovieAdapter extends RecyclerView.Adapter<SimpleDoubanM
         binding.btnAddToSeen.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                click(ADD_MEMO, binding);
+                click(BusinessConstans.MOVIE_ACTIVITY_ACTION_ADD_MEMO, binding);
             }
         });
         return holder;
@@ -118,33 +116,33 @@ public class SimpleDoubanMovieAdapter extends RecyclerView.Adapter<SimpleDoubanM
 
         @Override
         public void onClick(View v) {
-            click(SHOW_MOVIE_DETAIL, binding);
+            click(BusinessConstans.MOVIE_ACTIVITY_ACTION_SHOW_MOVIE_DETAIL, binding);
         }
 
     }
 
-    private void click(String todo, SimpleDoubanMovieItemBinding binding) {
+    private void click(String action, SimpleDoubanMovieItemBinding binding) {
         String movieId = binding.getSimpleDoubanMovie().getId();
         LogUtils.i(this, movieId + " is clicked!");
         if (onItemClickListener != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                onItemClickListener.onItemclick(todo, movieId,
+                onItemClickListener.onItemclick(action, movieId,
                         binding.getSimpleDoubanMovie().getTitle(),
                         binding.getSimpleDoubanMovie().isTv(),
-                        binding.getSimpleDoubanMovie().getImages().getMedium(),
+                        binding.getSimpleDoubanMovie().getImages().getLarge(),
                         binding.ivMovieImageMedium, ResourseUtils.getString(R.string.transition_name_poster));
             } else {
-                onItemClickListener.onItemclick(todo, movieId,
+                onItemClickListener.onItemclick(action, movieId,
                         binding.getSimpleDoubanMovie().getTitle(),
                         binding.getSimpleDoubanMovie().isTv(),
-                        binding.getSimpleDoubanMovie().getImages().getMedium(), null, null);
+                        binding.getSimpleDoubanMovie().getImages().getLarge(), null, null);
             }
         }
     }
 
     public interface OnItemClickListener {
 
-        void onItemclick(String todo, String movieId, String title, boolean isTv, String posterUrl, ImageView
+        void onItemclick(String action, String movieId, String title, boolean isTv, String posterUrl, ImageView
                 imageView, String transitionName);
     }
 

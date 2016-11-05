@@ -126,4 +126,22 @@ public class BusinessConstans {
      * 删除标记 不可用，已删除
      */
     public static final String IS_AVAILABLE_NO = "0";
+
+    /**
+     * MovieActivity动作标记，SHOW_MOVIE_DETAIL
+     */
+    public static final String MOVIE_ACTIVITY_ACTION_SHOW_MOVIE_DETAIL = "1";
+    /**
+     * MovieActivity动作标记，ADD_MEMO
+     */
+    public static final String MOVIE_ACTIVITY_ACTION_ADD_MEMO = "2";
+    /**
+     * MovieActivity动作标记，SHOW_MEMO
+     */
+    public static final String MOVIE_ACTIVITY_ACTION_SHOW_MEMO = "3";
+
+    /**
+     * 已看界面每页条目数
+     */
+    public static final int PAGE_SIZE_SEEN_MEMOS = 20;
 }

@@ -25,7 +25,9 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.Priority;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.zk.moviememos.App;
 import com.zk.moviememos.R;
+import com.zk.moviememos.constants.BusinessConstans;
 import com.zk.moviememos.contract.MovieContract;
 import com.zk.moviememos.databinding.ActivityMovieBinding;
 import com.zk.moviememos.model.DoubanMovieModel;
@@ -41,12 +43,12 @@ import com.zk.moviememos.util.DisplayUtils;
 import com.zk.moviememos.util.FragmentUtils;
 import com.zk.moviememos.util.LogUtils;
 import com.zk.moviememos.util.ResourseUtils;
-import com.zk.moviememos.view.Adapter.SimpleDoubanMovieAdapter;
 import com.zk.moviememos.view.fragment.AddEditMemoFragment;
 import com.zk.moviememos.view.fragment.BaseFragment;
 import com.zk.moviememos.view.fragment.MemoDetailFragment;
 import com.zk.moviememos.view.fragment.MovieDetailFragment;
-import com.zk.moviememos.view.fragment.SeenMemosFragment;
+
+import java.io.File;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
@@ -78,11 +80,11 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
     private ObjectAnimator mProgressAnimator;
 
     private String movieId;
-    private String todo;
+    private String action;
     private boolean isTv;
     private String memoId;
 
-    private Memo memo;
+    private Memo oldMemo;
     private Memo newMemo;
 
     @Override
@@ -97,21 +99,21 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
 
         Bundle bundle = getIntent().getExtras();
         movieId = bundle.getString("movieId");
-        todo = bundle.getString("todo");
+        action = bundle.getString("action");
         isTv = bundle.getBoolean("isTv");
         memoId = bundle.getString("memoId");
         String title = bundle.getString("title");
         String posterUrl = bundle.getString("posterUrl");
         binding.collapsingToolbar.setTitle(title);
 
-        initCollapsingToolbar(posterUrl);
+        initPoster(posterUrl);
 
         if (savedInstanceState == null) {
-            if (todo.equals(SimpleDoubanMovieAdapter.SHOW_MOVIE_DETAIL)) {
+            if (BusinessConstans.MOVIE_ACTIVITY_ACTION_SHOW_MOVIE_DETAIL.equals(action)) {
                 showMovieDetailFragment();
-            } else if (todo.equals(SimpleDoubanMovieAdapter.ADD_MEMO)) {
+            } else if (BusinessConstans.MOVIE_ACTIVITY_ACTION_ADD_MEMO.equals(action)) {
                 showAddEditMemoFragment();
-            } else if (todo.equals(SeenMemosFragment.SHOW_MEMO)) {
+            } else if (BusinessConstans.MOVIE_ACTIVITY_ACTION_SHOW_MEMO.equals(action)) {
                 showMemoDetailFragment();
             }
         }
@@ -156,9 +158,14 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
             public void onClick(View v) {
                 try {
                     addEditMemoPresenter.saveMemo(mDoubanMovie, newMemo);
+                    BitmapUtils.saveBitmapToCacheDir(MovieActivity.this,
+                            ((BitmapDrawable)(binding.ivMovieImageLarge.getDrawable())).getBitmap(), movieId + ".jpg");
+                    BitmapUtils.saveBitmapToCacheDir(MovieActivity.this,
+                            ((BitmapDrawable)(binding.ivMovieImageLargeBlur.getDrawable())).getBitmap(), "B" + movieId + ".jpg");
+                    App.updateSeenMemo = true;
                     Toast.makeText(MovieActivity.this, ResourseUtils.getString(R.string.save_success),
                             Toast.LENGTH_SHORT).show();
-                    fragmentManager.popBackStack();
+                    MovieActivity.this.onBackPressed();
                 } catch (Exception e) {
                     Toast.makeText(MovieActivity.this, ResourseUtils.getString(R.string.save_failure),
                             Toast.LENGTH_SHORT).show();
@@ -191,6 +198,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         memoDetailPresenter.deleteMemo(memoId);
+                        App.updateSeenMemo = true;
                         Toast.makeText(MovieActivity.this, R.string.delete_success, Toast.LENGTH_SHORT).show();
                         MovieActivity.this.finish();
                     }
@@ -205,69 +213,98 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
             }
         });
 
-        MoviePresenter moviePresenter = MoviePresenter.getInstance(DoubanMovieModel.getInstance(), this, movieId, memo);
-        moviePresenter.getMovie(todo);
+        MoviePresenter moviePresenter = MoviePresenter.getInstance(DoubanMovieModel.getInstance(), this, movieId);
+        moviePresenter.getMovie(oldMemo);
     }
 
-    private void initCollapsingToolbar(String PosterUrl) {
-        Glide.with(this).load(PosterUrl).asBitmap().priority(Priority.HIGH).into(new SimpleTarget<Bitmap>(100,
-                150) {
+    private void initPoster(String posterUrl) {
+        if (BusinessConstans.MOVIE_ACTIVITY_ACTION_SHOW_MEMO.equals(action)) {
+            final File posterFile = new File(getFilesDir(), movieId + ".jpg");
+            final File blurredPosterFile = new File(getFilesDir(), "B" + movieId + ".jpg");
+            if (posterFile.exists() && blurredPosterFile.exists()) {
+                Glide.with(this).load(posterFile).asBitmap().into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        LogUtils.d(this, "从缓存读取图片：   " + posterFile.getPath());
+                        binding.ivMovieImageLarge.setImageBitmap(resource);
+                    }
+                });
+                Glide.with(this).load(blurredPosterFile).asBitmap().into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
+                        LogUtils.d(this, "从缓存读取图片：   " + blurredPosterFile.getPath());
+                        binding.ivMovieImageLargeBlur.setImageBitmap(resource);
+                        revealAnim(binding.ivMovieImageLargeBlur);
+                    }
+                });
+            } else {
+                loadPosterFromWeb(posterUrl);
+            }
+        }
+        loadPosterFromWeb(posterUrl);
+    }
+
+    private void loadPosterFromWeb(String PosterUrl) {
+        Glide.with(this).load(PosterUrl).asBitmap().priority(Priority.HIGH).into(new SimpleTarget<Bitmap>() {
             @Override
             public void onResourceReady(Bitmap resource, GlideAnimation<? super Bitmap> glideAnimation) {
                 mediumPoster = new BitmapDrawable(resource);
                 binding.ivMovieImageLarge.setImageBitmap(resource);
-                Bitmap blurredPoster = BitmapUtils.doBlur(resource, 20, false);
+                Bitmap blurredPoster = BitmapUtils.doBlur(resource, 40, false);
                 blurredPoster = BitmapUtils.setBrightness(blurredPoster, -40);
                 final ImageView ivBlurredPoster = binding.ivMovieImageLargeBlur;
                 ivBlurredPoster.setImageBitmap(blurredPoster);
+                revealAnim(ivBlurredPoster);
+            }
+        });
+    }
 
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                    ivBlurredPoster.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+    private void revealAnim(final ImageView ivBlurredPoster) {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            ivBlurredPoster.addOnLayoutChangeListener(new View.OnLayoutChangeListener() {
+                @Override
+                public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int
+                        oldTop, int oldRight, int oldBottom) {
+                    v.removeOnLayoutChangeListener(this);
+                    float radius = (float) Math.hypot(ivBlurredPoster.getWidth(), ivBlurredPoster.getHeight());
+                    Animator reveal = null;
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                        reveal = ViewAnimationUtils.createCircularReveal(ivBlurredPoster, 0, DisplayUtils
+                                .dip2px(MovieActivity.this, 340), 0, radius);
+                    }
+                    reveal.setDuration(500);
+                    reveal.setInterpolator(new AccelerateInterpolator());
+                    reveal.start();
+                    reveal.addListener(new Animator.AnimatorListener() {
                         @Override
-                        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int
-                                oldTop, int oldRight, int oldBottom) {
-                            v.removeOnLayoutChangeListener(this);
-                            float radius = (float) Math.hypot(ivBlurredPoster.getWidth(), ivBlurredPoster.getHeight());
-                            Animator reveal = null;
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-                                reveal = ViewAnimationUtils.createCircularReveal(ivBlurredPoster, 0, DisplayUtils
-                                        .dip2px(MovieActivity.this, 340), 0, radius);
-                            }
-                            reveal.setDuration(500);
-                            reveal.setInterpolator(new AccelerateInterpolator());
-                            reveal.start();
-                            reveal.addListener(new Animator.AnimatorListener() {
-                                @Override
-                                public void onAnimationStart(Animator animation) {
+                        public void onAnimationStart(Animator animation) {
 
-                                }
+                        }
 
-                                @Override
-                                public void onAnimationEnd(Animator animation) {
-                                    binding.llMovieIntro.setVisibility(View.VISIBLE);
-                                }
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
 
-                                @Override
-                                public void onAnimationCancel(Animator animation) {
+                        }
 
-                                }
+                        @Override
+                        public void onAnimationCancel(Animator animation) {
 
-                                @Override
-                                public void onAnimationRepeat(Animator animation) {
+                        }
 
-                                }
-                            });
+                        @Override
+                        public void onAnimationRepeat(Animator animation) {
+
                         }
                     });
                 }
-            }
-        });
+            });
+        }
     }
 
     private void showMovieDetailFragment() {
         movieDetailFragment = (MovieDetailFragment) fragmentManager.findFragmentByTag(MOVIE_DETAIL_FRAGMENT_TAG);
         if (movieDetailFragment == null) {
-            movieDetailFragment = MovieDetailFragment.getInstance("arg");
+            movieDetailFragment = MovieDetailFragment.getInstance();
             movieDetailPresenter = MovieDetailPresenter.getInstance(LocalMemoModel.getInstance(this),
                     movieDetailFragment, movieId);
             if (mFramgent == null) {
@@ -277,6 +314,10 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
                 FragmentUtils.switchFragment(fragmentManager, mFramgent, movieDetailFragment,
                         MOVIE_DETAIL_FRAGMENT_TAG, true);
                 lastFragment = mFramgent;
+                if (BusinessConstans.MOVIE_ACTIVITY_ACTION_SHOW_MEMO.equals(action)) {
+                    movieDetailPresenter.getMemosByMovieId(mDoubanMovie.getId());
+                    movieDetailFragment.showMovieDetail(mDoubanMovie);
+                }
             }
         } else {
             FragmentUtils.switchFragment(fragmentManager, mFramgent, movieDetailFragment,
@@ -290,7 +331,11 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
         addEditMemoFragment = (AddEditMemoFragment) fragmentManager.findFragmentByTag
                 (ADD_EDIT_MEMO_FRAGMENT_TAG);
         if (addEditMemoFragment == null) {
-            newMemo = new Memo();
+            if (oldMemo == null) {
+                newMemo = new Memo();
+            } else {
+                newMemo = (Memo) oldMemo.clone();
+            }
             addEditMemoFragment = AddEditMemoFragment.getInstance(isTv);
             addEditMemoPresenter = AddEditMemoPresenter.getInstance(LocalMemoModel.getInstance(this),
                     addEditMemoFragment, memoId);
@@ -298,6 +343,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
                 FragmentUtils.addfragment(fragmentManager, addEditMemoFragment, R.id.fl_movie_detail,
                         ADD_EDIT_MEMO_FRAGMENT_TAG);
             } else {
+                addEditMemoFragment.setTargetFragment(mFramgent, 0);
                 FragmentUtils.switchFragment(fragmentManager, mFramgent, addEditMemoFragment,
                         ADD_EDIT_MEMO_FRAGMENT_TAG, true);
                 lastFragment = mFramgent;
@@ -329,7 +375,6 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
                     MEMO_DETAIL_FRAGMENT_TAG, true);
             lastFragment = mFramgent;
         }
-        this.memo = memoDetailPresenter.getMemo();
         mFramgent = memoDetailFragment;
     }
 
@@ -340,8 +385,8 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
 
     @Override
     public void onBackPressed() {
-        LogUtils.d(this, "fragment num:              " + fragmentManager.getFragments().size());
-        if (fragmentManager.getFragments().size() > 1) {
+        // 由于使用Glide会默认添加一个SupportRequestManagerFragment，所以再添加一个Fragment时会有两个Fragmnet
+        if (fragmentManager.getFragments().size() > 2) {
             if (mFramgent == addEditMemoFragment) {
                 binding.llAddEditMemoBtns.setVisibility(View.GONE);
                 if (lastFragment == movieDetailFragment) {
@@ -349,9 +394,14 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
                 } else if (lastFragment == memoDetailFragment) {
                     binding.llMemoDetailBtns.setVisibility(View.VISIBLE);
                 }
+                BaseFragment temp = mFramgent;
+                mFramgent = lastFragment;
+                lastFragment = temp;
             } else if (mFramgent == movieDetailFragment) {
                 binding.llMovieDetailBtns.setVisibility(View.GONE);
                 binding.llMemoDetailBtns.setVisibility(View.VISIBLE);
+                mFramgent = memoDetailFragment;
+                lastFragment = movieDetailFragment;
             }
         }
         super.onBackPressed();
@@ -359,22 +409,18 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
 
     @Override
     public void showMovie(DoubanMovie doubanMovie) {
+        LogUtils.d(this, "showMovie");
+        LogUtils.d(this, doubanMovie.getTitle());
+        binding.llMovieIntro.setVisibility(View.VISIBLE);
         binding.flMovieDetail.setVisibility(View.VISIBLE);
         mDoubanMovie = doubanMovie;
         binding.setDoubanMovie(doubanMovie);
-        Glide.with(MovieActivity.this).load(doubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
-                .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);
-        movieDetailPresenter.getMemosByMovieId();
-        movieDetailFragment.showMovieDetail(doubanMovie);
-    }
-
-    @Override
-    public void showMovieFromMemo(Memo memo) {
-        binding.flMovieDetail.setVisibility(View.VISIBLE);
-        mDoubanMovie = memo.getDoubanMovie();
-        binding.setDoubanMovie(mDoubanMovie);
-        Glide.with(MovieActivity.this).load(mDoubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
-                .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);
+        //Glide.with(MovieActivity.this).load(doubanMovie.getImages().getLarge()).priority(Priority.NORMAL)
+        //        .placeholder(mediumPoster).dontAnimate().into(binding.ivMovieImageLarge);
+        if (BusinessConstans.MOVIE_ACTIVITY_ACTION_SHOW_MOVIE_DETAIL.equals(action)) {
+            movieDetailPresenter.getMemosByMovieId(doubanMovie.getId());
+            movieDetailFragment.showMovieDetail(doubanMovie);
+        }
     }
 
     @Override
@@ -431,8 +477,12 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
         return mShown;
     }
 
-    public Memo getNewMemo() {
+    public Memo getMemo() {
         return newMemo;
+    }
+
+    public void setOldMemo(Memo memo) {
+        this.oldMemo = memo;
     }
 
 }

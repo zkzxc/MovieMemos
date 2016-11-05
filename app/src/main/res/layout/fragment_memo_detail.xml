@@ -29,7 +29,7 @@
                 android:layout_weight="2"
                 android:divider="?android:attr/listDivider"
                 android:orientation="vertical"
-                android:paddingLeft="6dp"
+                android:paddingLeft="8dp"
                 android:showDividers="middle">
 
                 <LinearLayout
@@ -133,6 +133,7 @@
                     <TextView
                         android:id="@+id/tv_average_score"
                         style="@style/item_content"
+                        android:layout_marginLeft="6dp"
                         android:textColor="?colorAccent"
                         android:textSize="22sp"
                         android:text="@{memo.averageScoreStr}" />
@@ -212,9 +213,12 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="6dp"
+                    android:paddingLeft="6dp"
+                    android:paddingRight="6dp"
+                    android:paddingBottom="12dp"
                     android:lineSpacingMultiplier="1.3"
                     android:textSize="15sp"
-                    android:text="@{memo.shortComment}" />
+                    android:text="@{memo.shortComment ?? memo.NO_SHORT_COMMENT}" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

@@ -1,9 +1,13 @@
 package com.zk.moviememos.view.fragment;
 
+import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.DatePickerDialog;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -24,7 +28,6 @@ import com.zk.moviememos.constants.BusinessConstans;
 import com.zk.moviememos.contract.AddEditMemoContract;
 import com.zk.moviememos.databinding.FragmentAddEditMemoBinding;
 import com.zk.moviememos.po.Memo;
-import com.zk.moviememos.util.DisplayUtils;
 import com.zk.moviememos.util.LogUtils;
 import com.zk.moviememos.view.activity.MovieActivity;
 
@@ -49,6 +52,7 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
     private boolean expandFlag;
     private int totalScore;
     private float averageScore;
+    private boolean rbReady;
 
     public static AddEditMemoFragment getInstance(boolean isTV) {
         Bundle bundle = new Bundle();
@@ -66,7 +70,7 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
             isTv = bundle.getBoolean(IS_TV);
         }
         if (savedInstanceState == null) {
-            memo = ((MovieActivity) mActivity).getNewMemo();
+            memo = ((MovieActivity) mActivity).getMemo();
         }
     }
 
@@ -87,7 +91,9 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
         final int year = calendar.get(Calendar.YEAR);
         final int month = calendar.get(Calendar.MONTH);
         final int day = calendar.get(Calendar.DAY_OF_MONTH);
-        memo.setViewingDate(calendar.getTimeInMillis());
+        if (memo.getMovieMemoId() == null) {
+            memo.setViewingDate(calendar.getTimeInMillis());
+        }
         showDate(year, month, day);
         mBinding.tvViewingDate.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -97,9 +103,6 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
         });
 
         // 评分
-        ViewGroup.LayoutParams layoutParams = mBinding.llRate.getLayoutParams();
-        layoutParams.height = getShortMeasureHeight();
-        mBinding.llRate.setLayoutParams(layoutParams);
         mBinding.llRateExpand.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,9 +112,26 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
         mBinding.rbAverageScore.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                averageScore = rating * 2;
-                mBinding.tvAverageScore.setText(String.valueOf(averageScore));
-                memo.setAverageScore(averageScore);
+                if (rbReady) {
+                    averageScore = rating * 2;
+                    mBinding.tvAverageScore.setText(String.valueOf(averageScore));
+                    memo.setAverageScore(averageScore);
+                    if (fromUser) {
+                        if (mBinding.rbStoryScore.getRating() != 0) {
+                            mBinding.rbStoryScore.setRating(0);
+                            memo.setStoryScore(null);
+                        }
+                        if (mBinding.rbVisualScore.getRating() != 0) {
+                            mBinding.rbVisualScore.setRating(0);
+                            memo.setVisualScore(null);
+                        }
+                        if (mBinding.rbAuralScore.getRating() != 0) {
+                            mBinding.rbAuralScore.setRating(0);
+                            memo.setAuralScore(null);
+                        }
+                        mBinding.rbAverageScore.setRating(rating);
+                    }
+                }
             }
         });
         mBinding.rbStoryScore.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -120,16 +140,18 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
 
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                int oldStoryScore = 0;
-                if (storyScore != 0) {
-                    oldStoryScore = storyScore;
-                    storyScore = 0;
+                if (rbReady) {
+                    int oldStoryScore = 0;
+                    if (storyScore != 0) {
+                        oldStoryScore = storyScore;
+                        storyScore = 0;
+                    }
+                    storyScore = (int) (rating * 2);
+                    mBinding.tvStoryScore.setText(String.valueOf(storyScore));
+                    memo.setStoryScore(storyScore);
+                    totalScore = totalScore - oldStoryScore + storyScore;
+                    mBinding.rbAverageScore.setRating(devide(totalScore, 6));
                 }
-                storyScore = (int) (rating * 2);
-                mBinding.tvStoryScore.setText(String.valueOf(storyScore));
-                memo.setStoryScore(storyScore);
-                totalScore = totalScore - oldStoryScore + storyScore;
-                mBinding.rbAverageScore.setRating(devide(totalScore, 6));
             }
         });
         mBinding.rbVisualScore.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -138,16 +160,18 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
 
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                int oldVisualScore = 0;
-                if (visualScore != 0) {
-                    oldVisualScore = visualScore;
-                    visualScore = 0;
+                if (rbReady) {
+                    int oldVisualScore = 0;
+                    if (visualScore != 0) {
+                        oldVisualScore = visualScore;
+                        visualScore = 0;
+                    }
+                    visualScore = (int) (rating * 2);
+                    mBinding.tvVisualScore.setText(String.valueOf(visualScore));
+                    memo.setVisualScore(visualScore);
+                    totalScore = totalScore - oldVisualScore + visualScore;
+                    mBinding.rbAverageScore.setRating(devide(totalScore, 6));
                 }
-                visualScore = (int) (rating * 2);
-                mBinding.tvVisualScore.setText(String.valueOf(visualScore));
-                memo.setVisualScore(visualScore);
-                totalScore = totalScore - oldVisualScore + visualScore;
-                mBinding.rbAverageScore.setRating(devide(totalScore, 6));
             }
         });
         mBinding.rbAuralScore.setOnRatingBarChangeListener(new RatingBar.OnRatingBarChangeListener() {
@@ -156,16 +180,18 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
 
             @Override
             public void onRatingChanged(RatingBar ratingBar, float rating, boolean fromUser) {
-                int oldAuralScore = 0;
-                if (auralScore != 0) {
-                    oldAuralScore = auralScore;
-                    auralScore = 0;
+                if (rbReady) {
+                    int oldAuralScore = 0;
+                    if (auralScore != 0) {
+                        oldAuralScore = auralScore;
+                        auralScore = 0;
+                    }
+                    auralScore = (int) (rating * 2);
+                    mBinding.tvAuralScore.setText(String.valueOf(auralScore));
+                    memo.setAuralScore(auralScore);
+                    totalScore = totalScore - oldAuralScore + auralScore;
+                    mBinding.rbAverageScore.setRating(devide(totalScore, 6));
                 }
-                auralScore = (int) (rating * 2);
-                mBinding.tvAuralScore.setText(String.valueOf(auralScore));
-                memo.setAuralScore(auralScore);
-                totalScore = totalScore - oldAuralScore + auralScore;
-                mBinding.rbAverageScore.setRating(devide(totalScore, 6));
             }
         });
 
@@ -188,7 +214,25 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
             }
         });
 
+        LogUtils.d(this, memo.toString());
+        if (memo.getMovieMemoId() != null) {
+            showOldMemo(memo);
+        }
         return mBinding.getRoot();
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                ViewGroup.LayoutParams layoutParams = mBinding.llRate.getLayoutParams();
+                layoutParams.height = getShortMeasureHeight();
+                mBinding.llRate.setLayoutParams(layoutParams);
+                rbReady = true;
+            }
+        });
     }
 
     // 初始化电视剧独有的控件
@@ -208,14 +252,19 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
                 switch (position) {
                     case 0:
                         memo.setViewingWay(BusinessConstans.VIEWING_WAY_ONLINE);
+                        break;
                     case 1:
                         memo.setViewingWay(BusinessConstans.VIEWING_WAY_DOWNLOAD);
+                        break;
                     case 2:
                         memo.setViewingWay(BusinessConstans.VIEWING_WAY_TV);
+                        break;
                     case 3:
                         memo.setViewingWay(BusinessConstans.VIEWING_WAY_DVD);
+                        break;
                     case 4:
                         memo.setViewingWay(BusinessConstans.VIEWING_WAY_OTHER);
+                        break;
                 }
             }
 
@@ -313,17 +362,22 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
             }
         });
         // 观影状态
+        if (memo.getMovieMemoId() == null) {
+            memo.setViewingMood(BusinessConstans.VIEWING_MOOD_AVERAGE);
+        }
         mBinding.rgViewingMood.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
-                LogUtils.d(this, "viewingMood checkedId:" + checkedId);
                 switch (checkedId) {
                     case R.id.rb_mood_good:
                         memo.setViewingMood(BusinessConstans.VIEWING_MOOD_GOOD);
+                        break;
                     case R.id.rb_mood_average:
                         memo.setViewingMood(BusinessConstans.VIEWING_MOOD_AVERAGE);
+                        break;
                     case R.id.rb_mood_bad:
                         memo.setViewingMood(BusinessConstans.VIEWING_MOOD_BAD);
+                        break;
                 }
             }
         });
@@ -351,6 +405,7 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
 
     // 分项评分的展开和收起
     private void expandAndCollapse() {
+        rbReady = false;
         final LinearLayout llRate = mBinding.llRate;
         final ImageView ivExpand = mBinding.ivExpand;
         final ViewGroup.LayoutParams layoutParams = llRate.getLayoutParams();
@@ -379,6 +434,27 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
                 llRate.setLayoutParams(layoutParams);
             }
         });
+        heightAnimator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                rbReady = true;
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        });
         heightAnimator.setDuration(300);
         heightAnimator.start();
         ObjectAnimator rotationAnimator = ObjectAnimator.ofFloat(ivExpand, "rotation", startRotation, endRotation);
@@ -387,24 +463,15 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
         rotationAnimator.start();
     }
 
-    // 获取评分LinearLayout的最小高高度，直接测量rlAveragerSvore的高度总是在第一次加载界面的时候有问题，拆开测量后解决
+    // 获取评分LinearLayout的最小高高度
     private int getShortMeasureHeight() {
         RelativeLayout rlAverageScore = mBinding.rlAverageScore;
-        LinearLayout llAverageScore = mBinding.llAverageScore;
-        RatingBar rbAverageScore = mBinding.rbAverageScore;
-        LinearLayout llRateExpand = mBinding.llRateExpand;
         int width = rlAverageScore.getMeasuredWidth();
         int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(width, View.MeasureSpec.EXACTLY);
         int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(1000, View.MeasureSpec.AT_MOST);
-        //rlAverageScore.measure(widthMeasureSpec, heightMeasureSpec);
-        //LogUtils.d(this, "short:   " + rlAverageScore.getMeasuredHeight());
-        rbAverageScore.measure(widthMeasureSpec, heightMeasureSpec);
-        llRateExpand.measure(widthMeasureSpec, heightMeasureSpec);
-        int rbHeight = rbAverageScore.getMeasuredHeight();
-        int llHeight = llRateExpand.getMeasuredHeight();
-        int padding = DisplayUtils.dip2px(mActivity, 4);
-        LogUtils.d(this, "rb:    " + rbHeight + "   ll:    " + llHeight + "    padding:    " + padding);
-        return rbHeight + llHeight + padding;
+        rlAverageScore.measure(widthMeasureSpec, heightMeasureSpec);
+        LogUtils.d(this, "short:   " + rlAverageScore.getMeasuredHeight());
+        return rlAverageScore.getMeasuredHeight();
     }
 
     // 获取评分LinearLayout的最大高度
@@ -428,5 +495,75 @@ public class AddEditMemoFragment extends BaseFragment<AddEditMemoContract.Presen
     @Override
     public void showMemo(Memo memo) {
         mBinding.setMemo(memo);
+    }
+
+    private void showOldMemo(Memo memo) {
+        mBinding.tvViewingDate.setText(memo.getViewingDateStr());
+        mBinding.rbAverageScore.setRating(memo.getAverageScore());
+        mBinding.tvAverageScore.setText(memo.getAverageScoreStr());
+        mBinding.rbStoryScore.setRating(memo.getStoryScore());
+        mBinding.tvStoryScore.setText(memo.getStoryScoreStr());
+        mBinding.rbVisualScore.setRating(memo.getVisualScore());
+        mBinding.tvVisualScore.setText(memo.getVisualScoreStr());
+        mBinding.rbAuralScore.setRating(memo.getAuralScore());
+        mBinding.tvAuralScore.setText(memo.getAuralScoreStr());
+        if (memo.getShortComment() != null) {
+
+            mBinding.etShortComment.setText(memo.getShortComment());
+        } else {
+            mBinding.etShortComment.setHint(R.string.no_short_comment);
+        }
+        if (isTv) {
+            switch (memo.getViewingWay()) {
+                case BusinessConstans.VIEWING_WAY_ONLINE:
+                    mBinding.spViewingWay.setSelection(0);
+                    break;
+                case BusinessConstans.VIEWING_WAY_DOWNLOAD:
+                    mBinding.spViewingWay.setSelection(1);
+                    break;
+                case BusinessConstans.VIEWING_WAY_TV:
+                    mBinding.spViewingWay.setSelection(2);
+                    break;
+                case BusinessConstans.VIEWING_WAY_DVD:
+                    mBinding.spViewingWay.setSelection(3);
+                    break;
+                case BusinessConstans.VIEWING_WAY_OTHER:
+                    mBinding.spViewingWay.setSelection(4);
+                    break;
+            }
+        } else {
+            if (BusinessConstans.VIEWING_WAY_OTHER.equals(memo.getViewingWay())) {
+                mBinding.spViewingWay.setSelection(5);
+            } else {
+                mBinding.spViewingWay.setSelection(Integer.valueOf(memo.getViewingWay()) - 1);
+            }
+            if (BusinessConstans.VIEWING_VERSION_OTHER1.equals(memo.getViewingVersion1())) {
+                mBinding.spViewingVersion1.setSelection(3);
+            } else {
+                mBinding.spViewingVersion1.setSelection(Integer.valueOf(memo.getViewingVersion1()) - 1);
+            }
+            if (BusinessConstans.VIEWING_VERSION_OTHER2.equals(memo.getViewingVersion2())) {
+                mBinding.spViewingVersion2.setSelection(2);
+            } else {
+                mBinding.spViewingVersion2.setSelection(Integer.valueOf(memo.getViewingVersion2()) - 1);
+            }
+            if (BusinessConstans.MOVIE_VERSION_OTHER.equals(memo.getMovieVersion())) {
+                mBinding.spMovieVersion.setSelection(3);
+            } else {
+                mBinding.spMovieVersion.setSelection(Integer.valueOf(memo.getMovieVersion()) - 1);
+            }
+            switch (memo.getViewingMood()) {
+                case BusinessConstans.VIEWING_MOOD_GOOD:
+                    mBinding.rgViewingMood.check(R.id.rb_mood_good);
+                    break;
+                case BusinessConstans.VIEWING_MOOD_AVERAGE:
+                    mBinding.rgViewingMood.check(R.id.rb_mood_average);
+                    break;
+                case BusinessConstans.VIEWING_MOOD_BAD:
+                    mBinding.rgViewingMood.check(R.id.rb_mood_bad);
+                    break;
+            }
+        }
+
     }
 }

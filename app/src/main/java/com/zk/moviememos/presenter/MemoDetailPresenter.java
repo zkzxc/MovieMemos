@@ -1,11 +1,10 @@
 package com.zk.moviememos.presenter;
 
-import android.os.Handler;
-import android.os.Looper;
-
 import com.zk.moviememos.contract.MemoDetailContract;
 import com.zk.moviememos.model.MemoModel;
 import com.zk.moviememos.po.Memo;
+import com.zk.moviememos.view.activity.MovieActivity;
+import com.zk.moviememos.view.fragment.MemoDetailFragment;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
@@ -31,24 +30,31 @@ public class MemoDetailPresenter implements MemoDetailContract.Presenter {
     }
 
     @Override
-    public void init() {
+    public void initOnCreate() {
+
+    }
+
+    @Override
+    public void loadOnResume() {
         getMemoById();
+    }
+
+    @Override
+    public void loadOnHiddenChanged(boolean hidden) {
+        if (!hidden) {
+            getMemoById();
+        }
     }
 
     public void getMemoById() {
         mModel.findMemoByMemoId(memoId, new MemoModel.LoadMemoCallback() {
             @Override
             public void onMemoLoaded(final Memo memo) {
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        MemoDetailPresenter.this.memo = memo;
-                        if (mView.isActive()) {
-                            mView.showMemo(memo);
-                        }
-                    }
-                });
+                MemoDetailPresenter.this.memo = memo;
+                if (mView.isActive()) {
+                    mView.showMemo(memo);
+                    ((MovieActivity) ((MemoDetailFragment) mView).getActivity()).setOldMemo(memo);
+                }
             }
 
             @Override
@@ -61,10 +67,6 @@ public class MemoDetailPresenter implements MemoDetailContract.Presenter {
     @Override
     public void deleteMemo(String memoId) {
         mModel.deleteMemoById(memoId);
-    }
-
-    public Memo getMemo() {
-        return this.memo;
     }
 
 }

@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.zk.moviememos.widget.ScrollUpChildSwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/refresh_layout"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
 
     <RelativeLayout
         android:layout_width="match_parent"
@@ -51,4 +48,4 @@
 
     </RelativeLayout>
 
-</com.zk.moviememos.widget.ScrollUpChildSwipeRefreshLayout>
+</layout>

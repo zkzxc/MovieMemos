@@ -11,21 +11,12 @@ import com.zk.moviememos.contract.TopContract;
 /**
  * Created by zk <zkzxc1988@163.com>.
  */
-public class TopFragment extends BaseFragment<TopContract.Presenter> {
+public class TopFragment extends BaseFragment<TopContract.Presenter> implements TopContract.View {
 
     public static final String TAG = "TopFragment";
 
-    private static TopFragment mFragment;
-
-    public TopFragment(){
-        this.mFragment = this;
-    }
-
     public static TopFragment getInstance() {
-        if (mFragment == null) {
-            mFragment = new TopFragment();
-        }
-        return mFragment;
+        return new TopFragment();
     }
 
     @Override

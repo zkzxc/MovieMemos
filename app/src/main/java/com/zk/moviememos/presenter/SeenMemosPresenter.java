@@ -3,6 +3,7 @@ package com.zk.moviememos.presenter;
 import android.os.Handler;
 import android.os.Looper;
 
+import com.zk.moviememos.App;
 import com.zk.moviememos.constants.BusinessConstans;
 import com.zk.moviememos.contract.SeenMemosContract;
 import com.zk.moviememos.model.LocalMemoModel;
@@ -22,14 +23,10 @@ public class SeenMemosPresenter implements SeenMemosContract.Presenter {
 
     private static MemoModel mMemoModel;
     private SeenMemosContract.View mView;
-
-    private static SeenMemosPresenter mPresenter;
+    private int offset;
 
     public static SeenMemosPresenter getInstance(MemoModel memoModel, SeenMemosContract.View view) {
-        if (mPresenter == null) {
-            mPresenter = new SeenMemosPresenter(memoModel, view);
-        }
-        return mPresenter;
+        return new SeenMemosPresenter(memoModel, view);
     }
 
     private SeenMemosPresenter(MemoModel memoModel, SeenMemosContract.View view) {
@@ -39,15 +36,32 @@ public class SeenMemosPresenter implements SeenMemosContract.Presenter {
     }
 
     @Override
-    public void init() {
-        loadMemos(false);
+    public void initOnCreate() {
+
     }
 
     @Override
-    public void loadMemos(boolean forceUpdate) {
+    public void loadOnResume() {
+        if (App.updateSeenMemo) {
+            App.updateSeenMemo = false;
+            offset = 0;
+            mView.clear();
+        }
+        loadMemos(offset);
+    }
+
+    @Override
+    public void loadOnHiddenChanged(boolean hidden) {
+
+    }
+
+    @Override
+    public void loadMemos(final int offset) {
+        this.offset = offset;
         mView.showProgress();
-        mMemoModel.loadSeenMemos(null, 20, 0, LocalMemoModel.MOVIE_MEMO_COLUMN_VIEWING_DATE,
-                BusinessConstans.ORDER_WAY_DESC, new MemoModel.LoadMemosCallback() {
+        mMemoModel.loadSeenMemos(null, BusinessConstans.PAGE_SIZE_SEEN_MEMOS, offset,
+                LocalMemoModel.MOVIE_MEMO_COLUMN_VIEWING_DATE, BusinessConstans.ORDER_WAY_DESC,
+                new MemoModel.LoadMemosCallback() {
                     @Override
                     public void onMemosLoaded(final List<SimpleMovieMemo> memos) {
                         Handler handler = new Handler(Looper.getMainLooper());
@@ -57,8 +71,13 @@ public class SeenMemosPresenter implements SeenMemosContract.Presenter {
                                 if (mView.isActive()) {
                                     mView.hideProgress();
                                     if (memos.isEmpty()) {
-                                        mView.showNoMemo();
+                                        if (offset == 0) {
+                                            mView.showNoMemo();
+                                        } else {
+                                            mView.addFooter();
+                                        }
                                     } else {
+                                        mView.hideNoMemo();
                                         List<SimpleMovieMemo> headerMemos = addSections(memos,
                                                 LocalMemoModel.MOVIE_MEMO_COLUMN_VIEWING_DATE);
                                         mView.showSeenMemos(headerMemos);

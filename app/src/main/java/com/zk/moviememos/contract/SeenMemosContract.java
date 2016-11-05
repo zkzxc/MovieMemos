@@ -12,11 +12,20 @@ import java.util.List;
 public interface SeenMemosContract {
 
     interface View extends BaseView<Presenter> {
+
         void showNoMemo();
+
         void showSeenMemos(List<SimpleMovieMemo> memos);
+
+        void hideNoMemo();
+
+        void addFooter();
+
+        void clear();
     }
 
     interface Presenter extends BasePresenter {
-        void loadMemos(boolean forceUpdate);
+
+        void loadMemos(int offset);
     }
 }

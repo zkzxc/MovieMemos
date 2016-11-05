@@ -53,8 +53,8 @@
                 <Spinner
                     android:id="@+id/sp_viewing_way"
                     style="@style/item_content"
-                    android:layout_width="150dp"
-                    android:dropDownWidth="150dp" />
+                    android:layout_width="140dp"
+                    android:dropDownWidth="140dp" />
             </LinearLayout>
 
             <LinearLayout
@@ -68,15 +68,15 @@
                 <Spinner
                     android:id="@+id/sp_viewing_version1"
                     style="@style/item_content"
-                    android:layout_width="150dp"
-                    android:dropDownWidth="150dp"
+                    android:layout_width="140dp"
+                    android:dropDownWidth="140dp"
                     android:entries="@array/viewing_version_1" />
 
                 <Spinner
                     android:id="@+id/sp_viewing_version2"
                     style="@style/item_content"
-                    android:layout_width="100dp"
-                    android:dropDownWidth="100dp"
+                    android:layout_width="90dp"
+                    android:dropDownWidth="90dp"
                     android:entries="@array/viewing_version_2" />
             </LinearLayout>
 
@@ -91,8 +91,8 @@
                 <Spinner
                     android:id="@+id/sp_movie_version"
                     style="@style/item_content"
-                    android:layout_width="150dp"
-                    android:dropDownWidth="150dp"
+                    android:layout_width="140dp"
+                    android:dropDownWidth="140dp"
                     android:entries="@array/movie_version" />
             </LinearLayout>
 
@@ -166,7 +166,7 @@
                         style="@style/item_content"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="40dp"
+                        android:layout_marginLeft="8dp"
                         android:layout_gravity="center_vertical"
                         android:orientation="horizontal">
 
@@ -181,7 +181,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_vertical"
-                            android:layout_marginLeft="10dp"
+                            android:layout_marginLeft="6dp"
                             android:text="0"
                             android:textSize="20sp" />
                     </LinearLayout>
@@ -220,6 +220,7 @@
 
                 <TextView
                     style="@style/item_title"
+                    android:layout_width="44dp"
                     android:text="@string/story" />
 
                 <LinearLayout
@@ -254,6 +255,7 @@
 
                 <TextView
                     style="@style/item_title"
+                    android:layout_width="44dp"
                     android:text="@string/visual" />
 
                 <LinearLayout
@@ -288,6 +290,7 @@
 
                 <TextView
                     style="@style/item_title"
+                    android:layout_width="44dp"
                     android:text="@string/aural" />
 
                 <LinearLayout

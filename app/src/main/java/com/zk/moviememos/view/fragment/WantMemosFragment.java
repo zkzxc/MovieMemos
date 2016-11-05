@@ -11,17 +11,12 @@ import com.zk.moviememos.contract.WantMemosContract;
 /**
  * Created by zk <zkzxc1988@163.com>.
  */
-public class WantMemosFragment extends BaseFragment<WantMemosContract.Presenter> {
+public class WantMemosFragment extends BaseFragment<WantMemosContract.Presenter> implements WantMemosContract.View {
 
     public static final String TAG = "WantMemosFragment";
 
-    private static WantMemosFragment mFragment;
-
     public static WantMemosFragment getInstance() {
-        if (mFragment == null) {
-            mFragment = new WantMemosFragment();
-        }
-        return mFragment;
+        return new WantMemosFragment();
     }
 
     @Override

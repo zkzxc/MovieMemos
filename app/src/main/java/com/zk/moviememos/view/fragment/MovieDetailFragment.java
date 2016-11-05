@@ -3,6 +3,8 @@ package com.zk.moviememos.view.fragment;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.support.v4.widget.NestedScrollView;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,31 +39,15 @@ import java.util.List;
 public class MovieDetailFragment extends BaseFragment<MovieDetailContract.Presenter> implements MovieDetailContract
         .View {
 
-    private static final String ARGUMENT = "argument";
-
     private FragmentMovieDetailBinding mBinding;
 
-    private String arg;
-    private DoubanMovie doubanMovie;
     private SimpleMovieMemoSlimAdapter memoAdapter;
 
     private boolean expandFlag;
 
-    public static MovieDetailFragment getInstance(String arg) {
-        Bundle bundle = new Bundle();
-        bundle.putString(ARGUMENT, arg);
-        MovieDetailFragment framgnet = new MovieDetailFragment();
-        framgnet.setArguments(bundle);
-        return framgnet;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Bundle bundle = getArguments();
-        if (bundle != null) {
-            arg = bundle.getString(ARGUMENT);
-        }
+    public static MovieDetailFragment getInstance() {
+        MovieDetailFragment fragment = new MovieDetailFragment();
+        return fragment;
     }
 
     @Override
@@ -90,9 +76,25 @@ public class MovieDetailFragment extends BaseFragment<MovieDetailContract.Presen
     }
 
     @Override
-    public void showMovieDetail(DoubanMovie doubanMovie) {
-        showCelebreties(doubanMovie);
-        mBinding.setDoubanMovie(doubanMovie);
+    public void onHiddenChanged(boolean hidden) {
+        super.onHiddenChanged(hidden);
+    }
+
+    @Override
+    public void showMovieDetail(final DoubanMovie doubanMovie) {
+        if (mBinding != null) {
+            showCelebreties(doubanMovie);
+            mBinding.setDoubanMovie(doubanMovie);
+        } else {
+            Handler handler = new Handler(Looper.getMainLooper());
+            handler.post(new Runnable() {
+                @Override
+                public void run() {
+                    showCelebreties(doubanMovie);
+                    mBinding.setDoubanMovie(doubanMovie);
+                }
+            });
+        }
     }
 
     @Override
