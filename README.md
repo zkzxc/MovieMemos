@@ -10,14 +10,14 @@
 
 ## 截图
 
-![电影展示页面](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/0.png)
+![电影展示页面](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/00.png)
 
-![首页侧滑](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/1.png)
+![首页侧滑](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/01.png)
 
-![首页已看列表展示](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/2.png)
+![首页已看列表展示](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/02.png)
 
-![搜索列表展示](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/3.png)
+![搜索列表展示](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/03.png)
 
-![记录与评分页面1](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/4.png)
+![记录与评分页面1](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/04.png)
 
-![记录与评分页面2](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/5.png)
+![记录与评分页面2](http://7xjamj.com1.z0.glb.clouddn.com/app/moviememos/ss/05.png)
