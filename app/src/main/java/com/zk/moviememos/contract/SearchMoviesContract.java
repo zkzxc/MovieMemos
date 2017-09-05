@@ -21,7 +21,7 @@ public interface SearchMoviesContract {
 
         void hideResults();
 
-        void showItem(String action, String movieId, String title, boolean isTv,  String posterUrl, ImageView imageView,
+        void showItem(String action, String movieId, String title, boolean isTv, String posterUrl, ImageView imageView,
                       String transitionName);
 
         void showNoResult();
@@ -33,8 +33,6 @@ public interface SearchMoviesContract {
 
     interface Presenter extends BasePresenter {
 
-        boolean onQueryTextSubmit(String query);
-
-        boolean onQueryTextChange(String newText);
+        void searchMovies(String query, int start);
     }
 }

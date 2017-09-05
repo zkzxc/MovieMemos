@@ -1,15 +1,19 @@
 package com.zk.moviememos.presenter;
 
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import com.zk.moviememos.App;
+import com.zk.moviememos.R;
 import com.zk.moviememos.contract.SearchMoviesContract;
 import com.zk.moviememos.model.DoubanMovieModel;
-import com.zk.moviememos.model.MovieModel;
-import com.zk.moviememos.util.LogUtils;
 import com.zk.moviememos.view.Adapter.SimpleDoubanMovieAdapter;
+import com.zk.moviememos.vo.DoubanSearchObject;
 import com.zk.moviememos.vo.SimpleDoubanMovie;
 
 import java.util.List;
+
+import rx.Subscriber;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
@@ -19,6 +23,7 @@ public class SearchMoviesPresenter implements SearchMoviesContract.Presenter, Si
 
     private DoubanMovieModel mModel;
     private SearchMoviesContract.View mView;
+    private Subscriber<DoubanSearchObject> subscriber;
 
     public static SearchMoviesPresenter getInstance(DoubanMovieModel model, SearchMoviesContract.View view) {
         return new SearchMoviesPresenter(model, view);
@@ -27,6 +32,32 @@ public class SearchMoviesPresenter implements SearchMoviesContract.Presenter, Si
     private SearchMoviesPresenter(DoubanMovieModel model, SearchMoviesContract.View view) {
         this.mModel = model;
         this.mView = view;
+        this.subscriber = new Subscriber<DoubanSearchObject>() {
+            @Override
+            public void onCompleted() {
+
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Toast.makeText(App.getContext(), R.string.movie_search_not_available, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNext(DoubanSearchObject doubanSearchObject) {
+                if (mView.isActive()) {
+                    mView.hideProgress();
+                    mView.hideInput();
+                    List<SimpleDoubanMovie> movies = doubanSearchObject.getSubjects();
+                    if (movies.size() > 0) {
+                        mView.showResults(movies);
+                    } else {
+                        mView.showNoResult();
+                    }
+                }
+            }
+        };
+
         mView.setPresenter(this);
     }
 
@@ -45,43 +76,13 @@ public class SearchMoviesPresenter implements SearchMoviesContract.Presenter, Si
 
     }
 
-    private void searchMoviesByKeyword(String keyword, int start, MovieModel.GetMoviesCallBack callBack) {
-        mModel.getMovies(keyword, start, callBack);
-    }
-
     @Override
-    public boolean onQueryTextSubmit(String query) {
-
+    public void searchMovies(String query, int start) {
         mView.hideBeforeSearch();
         mView.hideNoResult();
         mView.hideResults();
         mView.showProgress();
-        searchMoviesByKeyword(query, 0, new DoubanMovieModel.GetMoviesCallBack() {
-            @Override
-            public void onSuccess(List<SimpleDoubanMovie> simpleDoubanMovies) {
-                if (mView.isActive()) {
-                    mView.hideProgress();
-                    mView.hideInput();
-                    if (simpleDoubanMovies.size() > 0) {
-                        mView.showResults(simpleDoubanMovies);
-                    } else {
-                        mView.showNoResult();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure() {
-                LogUtils.i(this, "search fail!!!");
-                mView.hideProgress();
-                mView.showNoResult();
-            }
-        });
-        return true;
-    }
-
-    public boolean onQueryTextChange(String newText) {
-        return true;
+        mModel.getMovies(query, start, subscriber);
     }
 
     @Override

@@ -214,7 +214,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
         });
 
         MoviePresenter moviePresenter = MoviePresenter.getInstance(DoubanMovieModel.getInstance(), this, movieId);
-        moviePresenter.getMovie(oldMemo);
+        moviePresenter.getMovie(action);
     }
 
     private void initPoster(String posterUrl) {
@@ -305,7 +305,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
         movieDetailFragment = (MovieDetailFragment) fragmentManager.findFragmentByTag(MOVIE_DETAIL_FRAGMENT_TAG);
         if (movieDetailFragment == null) {
             movieDetailFragment = MovieDetailFragment.getInstance();
-            movieDetailPresenter = MovieDetailPresenter.getInstance(LocalMemoModel.getInstance(this),
+            movieDetailPresenter = MovieDetailPresenter.getInstance(LocalMemoModel.getInstance(),
                     movieDetailFragment, movieId);
             if (mFramgent == null) {
                 FragmentUtils.addfragment(fragmentManager, movieDetailFragment, R.id.fl_movie_detail,
@@ -337,7 +337,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
                 newMemo = (Memo) oldMemo.clone();
             }
             addEditMemoFragment = AddEditMemoFragment.getInstance(isTv);
-            addEditMemoPresenter = AddEditMemoPresenter.getInstance(LocalMemoModel.getInstance(this),
+            addEditMemoPresenter = AddEditMemoPresenter.getInstance(LocalMemoModel.getInstance(),
                     addEditMemoFragment, memoId);
             if (mFramgent == null) {
                 FragmentUtils.addfragment(fragmentManager, addEditMemoFragment, R.id.fl_movie_detail,
@@ -360,7 +360,7 @@ public class MovieActivity extends AppCompatActivity implements MovieContract.Vi
         memoDetailFragment = (MemoDetailFragment) fragmentManager.findFragmentByTag(MEMO_DETAIL_FRAGMENT_TAG);
         if (memoDetailFragment == null) {
             memoDetailFragment = MemoDetailFragment.getInstance();
-            memoDetailPresenter = MemoDetailPresenter.getInstance(LocalMemoModel.getInstance(this),
+            memoDetailPresenter = MemoDetailPresenter.getInstance(LocalMemoModel.getInstance(),
                     memoDetailFragment, memoId);
             if (mFramgent == null) {
                 FragmentUtils.addfragment(fragmentManager, memoDetailFragment, R.id.fl_movie_detail,

@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity
         if (isFirstEnter) {
             SharedPreferences sp = getSharedPreferences(SHAREDPREFERENCES_NAME, MODE_PRIVATE);
             sp.edit().putBoolean(SP_KEY_ISFIRSTENTER, false).commit();
-            MovieMemoSQLiteOpenHelper.getInstance(this).getWritableDatabase().close();
+            MovieMemoSQLiteOpenHelper.getInstance().getWritableDatabase().close();
         }
         flProgress = (FrameLayout) findViewById(R.id.fl_progress);
         ivProgress = (ImageView) findViewById(R.id.iv_progress);
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity
         mSeenMemosFragment = (SeenMemosFragment) mFragmentManager.findFragmentByTag(SeenMemosFragment.TAG);
         if (mSeenMemosFragment == null) {
             mSeenMemosFragment = SeenMemosFragment.getInstance();
-            mSeenMemosPresenter = SeenMemosPresenter.getInstance(LocalMemoModel.getInstance(this), mSeenMemosFragment);
+            mSeenMemosPresenter = SeenMemosPresenter.getInstance(LocalMemoModel.getInstance(), mSeenMemosFragment);
             FragmentUtils.addfragment(mFragmentManager, mSeenMemosFragment, R.id.fl_content, SeenMemosFragment.TAG);
         } else {
             FragmentUtils.switchFragment(mFragmentManager, mFragment, mSeenMemosFragment, SeenMemosFragment.TAG, false);
@@ -159,7 +159,7 @@ public class MainActivity extends AppCompatActivity
         mWantMemosFragment = (WantMemosFragment) mFragmentManager.findFragmentByTag(WantMemosFragment.TAG);
         if (mWantMemosFragment == null) {
             mWantMemosFragment = WantMemosFragment.getInstance();
-            mWantMemosPresenter = WantMemosPresenter.getInstance(LocalMemoModel.getInstance(this), mWantMemosFragment);
+            mWantMemosPresenter = WantMemosPresenter.getInstance(LocalMemoModel.getInstance(), mWantMemosFragment);
         }
         FragmentUtils.switchFragment(mFragmentManager, mFragment, mWantMemosFragment, WantMemosFragment.TAG, false);
         lastFragment = mFragment;
@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity
         mTagFragment = (TagFragment) mFragmentManager.findFragmentByTag(TagFragment.TAG);
         if (mTagFragment == null) {
             mTagFragment = TagFragment.getInstance();
-            mTagPresenter = TagPresenter.getInstance(LocalMemoModel.getInstance(this), mTagFragment);
+            mTagPresenter = TagPresenter.getInstance(LocalMemoModel.getInstance(), mTagFragment);
         }
         FragmentUtils.switchFragment(mFragmentManager, mFragment, mTagFragment, TagFragment.TAG, false);
         lastFragment = mFragment;
@@ -183,7 +183,7 @@ public class MainActivity extends AppCompatActivity
         mTopFragment = (TopFragment) mFragmentManager.findFragmentByTag(TopFragment.TAG);
         if (mTopFragment == null) {
             mTopFragment = TopFragment.getInstance();
-            mTopPresenter = TopPresenter.getInstance(LocalMemoModel.getInstance(this), mTopFragment);
+            mTopPresenter = TopPresenter.getInstance(LocalMemoModel.getInstance(), mTopFragment);
         }
         FragmentUtils.switchFragment(mFragmentManager, mFragment, mTopFragment, TopFragment.TAG, false);
         lastFragment = mFragment;

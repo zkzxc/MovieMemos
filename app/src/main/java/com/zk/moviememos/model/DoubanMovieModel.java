@@ -3,59 +3,53 @@ package com.zk.moviememos.model;
 import android.content.ContentValues;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.widget.Toast;
 
-import com.zk.moviememos.App;
-import com.zk.moviememos.R;
+import com.zk.moviememos.api.ClientBuilder;
+import com.zk.moviememos.api.DoubanMoveApi;
 import com.zk.moviememos.constants.DefaultConfigs;
 import com.zk.moviememos.po.DoubanMovie;
-import com.zk.moviememos.util.LogUtils;
+import com.zk.moviememos.util.PinyinUtils;
 import com.zk.moviememos.vo.DoubanSearchObject;
 
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava.RxJavaCallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.http.GET;
-import retrofit2.http.Path;
-import retrofit2.http.Query;
+import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by zk <zkzxc1988@163.com>.
  */
 public class DoubanMovieModel implements MovieModel {
 
-    private static DoubanMovieModel mModel;
-    private static MovieMemoSQLiteOpenHelper helper;
+    private MovieMemoSQLiteOpenHelper helper;
+    private Retrofit retrofit;
+    private DoubanMoveApi doubanMoveApi;
 
     private DoubanMovieModel() {
+        helper = MovieMemoSQLiteOpenHelper.getInstance();
+        retrofit = new Retrofit.Builder()
+                .client(ClientBuilder.getInstance().getClient())
+                .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+                .baseUrl(DefaultConfigs.DOUBAN_BASE_URL)
+                .build();
+        doubanMoveApi = retrofit.create(DoubanMoveApi.class);
+    }
+
+    public static class SingletonHolder{
+        private static final DoubanMovieModel INSTANCE = new DoubanMovieModel();
     }
 
     public static DoubanMovieModel getInstance() {
-        helper = MovieMemoSQLiteOpenHelper.getInstance(App.getContext());
-        if (mModel == null) {
-            mModel = new DoubanMovieModel();
-        }
-        return mModel;
-    }
-
-    Retrofit retrofit = new Retrofit.Builder().baseUrl(DefaultConfigs.DOUBAN_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create()).build();
-    IDoubanMovieBiz doubanMovieBiz = retrofit.create(IDoubanMovieBiz.class);
-
-    private interface IDoubanMovieBiz {
-
-        @GET("search")
-        Call<DoubanSearchObject> getMoviesByKeyword(@Query("q") String keyword);
-
-        @GET("subject/{id}")
-        Call<DoubanMovie> getMovieById(@Path("id") String id);
+        return SingletonHolder.INSTANCE;
     }
 
     @Override
-    public void getMovies(String keyword, int start, final GetMoviesCallBack callBack) {
-        Call<DoubanSearchObject> call = doubanMovieBiz.getMoviesByKeyword(keyword);
+    public void getMovies(String keyword, int start, Subscriber<DoubanSearchObject> subscriber) {
+        /*Call<DoubanSearchObject> call = doubanMoveApi.queryMoviesByKeyword(keyword);
         call.enqueue(new Callback<DoubanSearchObject>() {
             @Override
             public void onResponse(Call<DoubanSearchObject> call, Response<DoubanSearchObject> response) {
@@ -69,12 +63,17 @@ public class DoubanMovieModel implements MovieModel {
                 t.printStackTrace();
                 callBack.onFailure();
             }
-        });
+        });*/
+        doubanMoveApi.queryMoviesByKeyword(keyword)
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber);
     }
 
     @Override
-    public void getMovieById(String id, final GetMovieCallBack callBack) {
-        Call<DoubanMovie> call = doubanMovieBiz.getMovieById(id);
+    public void getMovieById(String id, Subscriber<DoubanMovie> subscriber) {
+        /*Call<DoubanMovie> call = doubanMoveApi.getMovieById(id);
         call.enqueue(new Callback<DoubanMovie>() {
             @Override
             public void onResponse(Call<DoubanMovie> call, Response<DoubanMovie> response) {
@@ -94,17 +93,37 @@ public class DoubanMovieModel implements MovieModel {
                 t.printStackTrace();
                 callBack.onFailure();
             }
-        });
+        });*/
+        doubanMoveApi.getMovieById(id)
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber);
     }
 
     @Override
-    public void updateMovie(DoubanMovie movie) {
+    public void getAndUpdateMovieById(String id, Subscriber<DoubanMovie> subscriber) {
+        doubanMoveApi.getMovieById(id)
+                .doOnNext(new Action1<DoubanMovie>() {
+                    @Override
+                    public void call(DoubanMovie doubanMovie) {
+                        updateMovie(doubanMovie);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .unsubscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(subscriber);
+    }
+
+    private void updateMovie(DoubanMovie movie) {
         SQLiteDatabase db = helper.getWritableDatabase();
         db.beginTransaction();
         try {
             ContentValues values = new ContentValues();
             if (movie.getTitle() != null) {
                 values.put("title", movie.getTitle());
+                values.put("pinyin_title", PinyinUtils.hanziToPinyin(movie.getTitle()));
             }
             if (movie.getOriginal_title() != null) {
                 values.put("original_title", movie.getOriginal_title());

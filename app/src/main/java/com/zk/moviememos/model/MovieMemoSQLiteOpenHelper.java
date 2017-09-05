@@ -1,10 +1,10 @@
 package com.zk.moviememos.model;
 
-import android.content.Context;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import com.zk.moviememos.App;
 import com.zk.moviememos.constants.DefaultConfigs;
 
 
@@ -13,17 +13,18 @@ import com.zk.moviememos.constants.DefaultConfigs;
  */
 public class MovieMemoSQLiteOpenHelper extends SQLiteOpenHelper {
 
-    private static MovieMemoSQLiteOpenHelper helper;
-
-    private MovieMemoSQLiteOpenHelper(Context context) {
-        super(context, DefaultConfigs.DATABASE_NAME + ".db", null, 1);
+    private MovieMemoSQLiteOpenHelper() {
+        super(App.getContext(), DefaultConfigs.DATABASE_NAME + ".db", null, 1);
     }
 
-    public static MovieMemoSQLiteOpenHelper getInstance(Context context) {
-        if (helper == null) {
-            helper = new MovieMemoSQLiteOpenHelper(context);
-        }
-        return helper;
+    public static class SingletonHolder {
+
+        private static final MovieMemoSQLiteOpenHelper INSTANCE = new MovieMemoSQLiteOpenHelper();
+
+    }
+
+    public static MovieMemoSQLiteOpenHelper getInstance() {
+        return SingletonHolder.INSTANCE;
     }
 
     @Override
@@ -31,8 +32,8 @@ public class MovieMemoSQLiteOpenHelper extends SQLiteOpenHelper {
         db.beginTransaction();
 
         try {
-            db.execSQL("CREATE TABLE [movie]([id] varchar(10) PRIMARY KEY,[title] varchar(256), [original_title] varchar" +
-                    "(256),[pinyin_title] varchar(256), [aka] varchar(1024)," +
+            db.execSQL("CREATE TABLE [movie]([id] varchar(10) PRIMARY KEY,[title] varchar(256), [original_title] " +
+                    "varchar(256),[pinyin_title] varchar(256), [aka] varchar(1024)," +
                     "[douban_score] float,[image_small] varchar(256),[image_medium] varchar(256)," +
                     "[image_large] varchar(256),[subtype] char(1),[directors] varchar(256),[casts] varchar(1024)," +
                     "[year] char(4),[genres] varchar(256), [countries] varchar(256),[summary] varchar(1024)," +

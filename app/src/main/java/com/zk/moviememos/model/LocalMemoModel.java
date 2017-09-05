@@ -1,7 +1,6 @@
 package com.zk.moviememos.model;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -11,6 +10,7 @@ import com.zk.moviememos.constants.BusinessConstans;
 import com.zk.moviememos.po.DoubanMovie;
 import com.zk.moviememos.po.Memo;
 import com.zk.moviememos.util.LogUtils;
+import com.zk.moviememos.util.PinyinUtils;
 import com.zk.moviememos.vo.SimpleMovieMemo;
 
 import java.util.ArrayList;
@@ -33,8 +33,8 @@ public class LocalMemoModel implements MemoModel {
     private LocalMemoModel() {
     }
 
-    public static LocalMemoModel getInstance(Context context) {
-        helper = MovieMemoSQLiteOpenHelper.getInstance(context);
+    public static LocalMemoModel getInstance() {
+        helper = MovieMemoSQLiteOpenHelper.getInstance();
         if (mModel == null) {
             mModel = new LocalMemoModel();
         }
@@ -58,7 +58,8 @@ public class LocalMemoModel implements MemoModel {
                 }
             } else {
                 db.execSQL("insert into movie values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", new Object[]{
-                        movie.getId(), movie.getTitle(), movie.getOriginal_title(), movie.getPinyin_title(),
+                        movie.getId(), movie.getTitle(), movie.getOriginal_title(),
+                        PinyinUtils.hanziToPinyin(movie.getTitle()),
                         movie.getAka(), movie.getRating().getAverage(), movie.getImages().getSmall(),
                         movie.getImages().getMedium(), movie.getImages().getLarge(), movie.getSubtype(),
                         movie.getDirectorsNames(), movie.getCastsNames(), movie.getYear(), movie.getGenres(),

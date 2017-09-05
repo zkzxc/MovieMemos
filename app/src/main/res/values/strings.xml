@@ -25,7 +25,7 @@
     <string name="add_tag">添加标签</string>
     <string name="TV_tag">TV</string>
     <string name="etc">等</string>
-    <string name="movie_item_not_available">无法获取该影视作品信息</string>
+    <string name="movie_item_not_available">当前无法获取该影视作品信息</string>
     <string name="no_raing">暂无评分</string>
     <string name="TV_Chinese_tag">电视剧</string>
     <string name="total">共</string>
@@ -89,4 +89,5 @@
     <string name="welcome_hint">点击右下的“ + ”号搜索查看想要的影视作品信息，然后添加到记录中</string>
     <string name="exit_by_2_click_hint">再按一次退出程序</string>
     <string name="have_loaded_all">已加载全部</string>
+    <string name="movie_search_not_available">当前无法获取影视搜索数据</string>
 </resources>

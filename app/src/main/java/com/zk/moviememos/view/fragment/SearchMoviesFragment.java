@@ -96,12 +96,13 @@ public class SearchMoviesFragment extends BaseFragment<SearchMoviesContract.Pres
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
-                return mPresenter.onQueryTextSubmit(query);
+                mPresenter.searchMovies(query, 0);
+                return true;
             }
 
             @Override
             public boolean onQueryTextChange(String newText) {
-                return mPresenter.onQueryTextChange(newText);
+                return true;
             }
         });
         super.onCreateOptionsMenu(menu, inflater);
